@@ -35,15 +35,12 @@ npm run test:coverage
 - **Git Hooks**: Husky is configured to run tests on `pre-push` to ensure no breaking changes are pushed to the repository.
 
 ## 📦 Installation & Setup
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   ```
-2. Install dependencies:
+
+1. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
+2. Start the development server:
    ```bash
    npm run dev
    ```
