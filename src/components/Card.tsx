@@ -1,17 +1,18 @@
-import { Component } from 'react';
 import type { Item } from '../types';
 
 interface CardProps {
   item: Item;
+  onSelectItem: (itemId: string) => void;
 }
 
-export class Card extends Component<CardProps> {
-  render() {
-    return (
-      <article>
-        <h2>{this.props.item.name}</h2>
-        <p>{this.props.item.description}</p>
-      </article>
-    );
-  }
+export function Card({ item, onSelectItem }: CardProps) {
+  return (
+    <article>
+      <h2>{item.name}</h2>
+      <p>{item.description}</p>
+      <button type="button" onClick={() => onSelectItem(item.id)}>
+        View details
+      </button>
+    </article>
+  );
 }

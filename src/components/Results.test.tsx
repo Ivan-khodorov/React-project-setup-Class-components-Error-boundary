@@ -6,10 +6,14 @@ describe('Results', () => {
   it('displays the loading state', () => {
     render(
       <Results
+        currentPage={1}
         error=""
         isLoading={true}
         items={[]}
+        onPageChange={vi.fn()}
+        onSelectItem={vi.fn()}
         onThrowError={vi.fn()}
+        totalPages={0}
       />
     );
 
@@ -24,6 +28,7 @@ describe('Results', () => {
 
     render(
       <Results
+        currentPage={1}
         error=""
         isLoading={false}
         items={[
@@ -33,7 +38,10 @@ describe('Results', () => {
             description: 'Science officer aboard the USS Enterprise.',
           },
         ]}
+        onPageChange={vi.fn()}
+        onSelectItem={vi.fn()}
         onThrowError={onThrowError}
+        totalPages={1}
       />
     );
 
@@ -52,10 +60,14 @@ describe('Results', () => {
   it('displays the error state', () => {
     render(
       <Results
+        currentPage={1}
         error="Unable to load characters."
         isLoading={false}
         items={[]}
+        onPageChange={vi.fn()}
+        onSelectItem={vi.fn()}
         onThrowError={vi.fn()}
+        totalPages={0}
       />
     );
 
@@ -65,5 +77,36 @@ describe('Results', () => {
     expect(
       screen.getByRole('button', { name: /test error/i })
     ).toBeInTheDocument();
+  });
+
+  it('displays pagination after items are loaded when multiple pages exist', () => {
+    const onPageChange = vi.fn();
+
+    render(
+      <Results
+        currentPage={2}
+        error=""
+        isLoading={false}
+        items={[
+          {
+            id: 'spock',
+            name: 'Spock',
+            description: 'Science officer aboard the USS Enterprise.',
+          },
+        ]}
+        onPageChange={onPageChange}
+        onSelectItem={vi.fn()}
+        onThrowError={vi.fn()}
+        totalPages={3}
+      />
+    );
+
+    expect(
+      screen.getByRole('navigation', { name: /pagination/i })
+    ).toBeInTheDocument();
+
+    screen.getByRole('button', { name: '3' }).click();
+
+    expect(onPageChange).toHaveBeenCalledWith(3);
   });
 });

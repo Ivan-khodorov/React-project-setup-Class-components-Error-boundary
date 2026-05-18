@@ -1,9 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Card } from './Card';
 
 describe('Card', () => {
   it('displays the item name and description', () => {
+    const onSelectItem = vi.fn();
+
     render(
       <Card
         item={{
@@ -11,6 +13,7 @@ describe('Card', () => {
           name: 'Spock',
           description: 'Science officer aboard the USS Enterprise.',
         }}
+        onSelectItem={onSelectItem}
       />
     );
 
@@ -20,5 +23,9 @@ describe('Card', () => {
     expect(
       screen.getByText('Science officer aboard the USS Enterprise.')
     ).toBeInTheDocument();
+
+    screen.getByRole('button', { name: /view details/i }).click();
+
+    expect(onSelectItem).toHaveBeenCalledWith('spock');
   });
 });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchCharacters } from './starTrekCharactersApi';
+import { fetchCharacterDetails, fetchCharacters } from './starTrekCharactersApi';
 
 describe('fetchCharacters', () => {
   afterEach(() => {
@@ -8,7 +8,10 @@ describe('fetchCharacters', () => {
 
   it('sends a POST request with default pagination', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
-      json: vi.fn().mockResolvedValue({ characters: [] }),
+      json: vi.fn().mockResolvedValue({
+        characters: [],
+        page: { totalPages: 1 },
+      }),
       ok: true,
     });
 
@@ -33,7 +36,10 @@ describe('fetchCharacters', () => {
 
   it('trims the search term before sending the request body', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
-      json: vi.fn().mockResolvedValue({ characters: [] }),
+      json: vi.fn().mockResolvedValue({
+        characters: [],
+        page: { totalPages: 1 },
+      }),
       ok: true,
     });
 
@@ -60,20 +66,24 @@ describe('fetchCharacters', () => {
             yearOfBirth: 2230,
           },
         ],
+        page: { totalPages: 3 },
       }),
       ok: true,
     });
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('spock')).resolves.toEqual([
-      {
-        description:
-          'Gender: Male. Birth year: 2230. Death year: unknown.',
-        id: 'spock',
-        name: 'Spock',
-      },
-    ]);
+    await expect(fetchCharacters('spock')).resolves.toEqual({
+      items: [
+        {
+          description:
+            'Gender: Male. Birth year: 2230. Death year: unknown.',
+          id: 'spock',
+          name: 'Spock',
+        },
+      ],
+      totalPages: 3,
+    });
   });
 
   it('uses unknown for missing response fields', async () => {
@@ -85,20 +95,24 @@ describe('fetchCharacters', () => {
             uid: 'unknown-crew-member',
           },
         ],
+        page: { totalPages: 1 },
       }),
       ok: true,
     });
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('unknown')).resolves.toEqual([
-      {
-        description:
-          'Gender: unknown. Birth year: unknown. Death year: unknown.',
-        id: 'unknown-crew-member',
-        name: 'Unknown Crew Member',
-      },
-    ]);
+    await expect(fetchCharacters('unknown')).resolves.toEqual({
+      items: [
+        {
+          description:
+            'Gender: unknown. Birth year: unknown. Death year: unknown.',
+          id: 'unknown-crew-member',
+          name: 'Unknown Crew Member',
+        },
+      ],
+      totalPages: 1,
+    });
   });
 
   it('throws on non-ok responses', async () => {
@@ -118,6 +132,7 @@ describe('fetchCharacters', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       json: vi.fn().mockResolvedValue({
         characters: null,
+        page: { totalPages: 1 },
       }),
       ok: true,
     });
@@ -127,5 +142,52 @@ describe('fetchCharacters', () => {
     await expect(fetchCharacters('spock')).rejects.toThrow(
       'Unexpected response format.'
     );
+  });
+
+  it('converts UI page number to zero-based API page number', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        characters: [],
+        page: { totalPages: 4 },
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchCharacters('', 3);
+
+    const [requestUrl] = fetchMock.mock.calls[0];
+
+    expect(requestUrl.searchParams.get('pageNumber')).toBe('2');
+  });
+
+  it('fetches character details by uid', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        character: {
+          gender: 'Male',
+          name: 'Spock',
+          uid: 'spock',
+          yearOfBirth: 2230,
+        },
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchCharacterDetails('spock')).resolves.toEqual({
+      birthYear: '2230',
+      deathYear: 'unknown',
+      description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
+      gender: 'Male',
+      id: 'spock',
+      name: 'Spock',
+    });
+
+    const [requestUrl] = fetchMock.mock.calls[0];
+
+    expect(requestUrl.searchParams.get('uid')).toBe('spock');
   });
 });
