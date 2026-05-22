@@ -31,10 +31,14 @@ export class ErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <main>
-          <section role="alert">
+        <main className="error-boundary-page">
+          <section className="error-panel" role="alert">
+            <p className="error-panel__code">Error</p>
             <h1>Something went wrong.</h1>
-            <p>Please reload the page and try again.</p>
+            <p>
+              Please reload the page and try again. The error was logged for
+              debugging.
+            </p>
           </section>
         </main>
       );

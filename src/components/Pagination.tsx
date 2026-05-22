@@ -1,3 +1,5 @@
+import type { MouseEvent } from 'react';
+
 interface PaginationProps {
   currentPage: number;
   onPageChange: (page: number) => void;
@@ -22,9 +24,16 @@ export function Pagination({
   totalPages,
 }: PaginationProps) {
   const pages = getVisiblePages(currentPage, totalPages);
+  const handlePaginationClick = (event: MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+  };
 
   return (
-    <nav className="pagination" aria-label="Pagination">
+    <nav
+      className="pagination"
+      aria-label="Pagination"
+      onClick={handlePaginationClick}
+    >
       <button
         type="button"
         disabled={currentPage === 1}

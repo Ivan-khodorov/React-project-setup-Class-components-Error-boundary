@@ -1,7 +1,12 @@
 export interface Item {
+  detailsId: string;
   id: string;
   name: string;
   description: string;
+}
+
+export interface SelectedItem extends Item {
+  detailsUrl: string;
 }
 
 export interface CharacterDetailsData extends Item {

@@ -4,6 +4,7 @@ import { fetchCharacterDetails } from '../services/starTrekCharactersApi';
 import type { CharacterDetailsData } from '../types';
 
 const DETAILS_PARAM = 'details';
+const UNKNOWN_VALUE = 'unknown';
 
 interface CharacterDetailsState {
   data: CharacterDetailsData | null;
@@ -67,33 +68,54 @@ export function CharacterDetails() {
     event.stopPropagation();
   };
 
+  const getValueClassName = (value: string) =>
+    value === UNKNOWN_VALUE
+      ? 'details-list__value details-list__value--empty'
+      : 'details-list__value';
+
+  const panelTitle = state.data?.name ?? 'Character details';
+
   return (
     <aside
       className="details-panel"
       aria-label="Character details"
       onClick={handlePanelClick}
     >
-      <button type="button" onClick={handleClose}>
-        Close
-      </button>
+      <header className="details-panel__header">
+        <div>
+          <p className="details-panel__eyebrow">Character details</p>
+          <h2>{panelTitle}</h2>
+        </div>
+        <button
+          className="details-panel__close"
+          type="button"
+          onClick={handleClose}
+        >
+          Close
+        </button>
+      </header>
       {isLoading && <div role="status">Loading details...</div>}
       {!isLoading && state.error && <div role="alert">{state.error}</div>}
       {!isLoading && state.data && (
         <article>
-          <h2>{state.data.name}</h2>
-          <p>{state.data.description}</p>
-          <dl>
-            <div>
+          <dl className="details-list">
+            <div className="details-list__item">
               <dt>Gender</dt>
-              <dd>{state.data.gender}</dd>
+              <dd className={getValueClassName(state.data.gender)}>
+                {state.data.gender}
+              </dd>
             </div>
-            <div>
+            <div className="details-list__item">
               <dt>Birth year</dt>
-              <dd>{state.data.birthYear}</dd>
+              <dd className={getValueClassName(state.data.birthYear)}>
+                {state.data.birthYear}
+              </dd>
             </div>
-            <div>
+            <div className="details-list__item">
               <dt>Death year</dt>
-              <dd>{state.data.deathYear}</dd>
+              <dd className={getValueClassName(state.data.deathYear)}>
+                {state.data.deathYear}
+              </dd>
             </div>
           </dl>
         </article>

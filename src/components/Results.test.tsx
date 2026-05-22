@@ -1,10 +1,23 @@
+import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 import { describe, expect, it, vi } from 'vitest';
 import { Results } from './Results';
+import { selectedItemsReducer } from '../store/selectedItemsSlice';
+
+const renderWithStore = (ui: React.ReactElement) => {
+  const store = configureStore({
+    reducer: {
+      selectedItems: selectedItemsReducer,
+    },
+  });
+
+  return render(<Provider store={store}>{ui}</Provider>);
+};
 
 describe('Results', () => {
   it('displays the loading state', () => {
-    render(
+    renderWithStore(
       <Results
         currentPage={1}
         error=""
@@ -26,13 +39,14 @@ describe('Results', () => {
   it('displays items and calls the error callback', () => {
     const onThrowError = vi.fn();
 
-    render(
+    renderWithStore(
       <Results
         currentPage={1}
         error=""
         isLoading={false}
         items={[
           {
+            detailsId: 'spock',
             id: 'spock',
             name: 'Spock',
             description: 'Science officer aboard the USS Enterprise.',
@@ -58,7 +72,7 @@ describe('Results', () => {
   });
 
   it('displays the error state', () => {
-    render(
+    renderWithStore(
       <Results
         currentPage={1}
         error="Unable to load characters."
@@ -82,13 +96,14 @@ describe('Results', () => {
   it('displays pagination after items are loaded when multiple pages exist', () => {
     const onPageChange = vi.fn();
 
-    render(
+    renderWithStore(
       <Results
         currentPage={2}
         error=""
         isLoading={false}
         items={[
           {
+            detailsId: 'spock',
             id: 'spock',
             name: 'Spock',
             description: 'Science officer aboard the USS Enterprise.',

@@ -78,7 +78,8 @@ describe('fetchCharacters', () => {
         {
           description:
             'Gender: Male. Birth year: 2230. Death year: unknown.',
-          id: 'spock',
+          detailsId: 'spock',
+          id: 'spock-0',
           name: 'Spock',
         },
       ],
@@ -107,11 +108,77 @@ describe('fetchCharacters', () => {
         {
           description:
             'Gender: unknown. Birth year: unknown. Death year: unknown.',
-          id: 'unknown-crew-member',
+          detailsId: 'unknown-crew-member',
+          id: 'unknown-crew-member-0',
           name: 'Unknown Crew Member',
         },
       ],
       totalPages: 1,
+    });
+  });
+
+  it('uses unknown for null response fields', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        characters: [
+          {
+            gender: null,
+            name: 'Null Crew Member',
+            uid: 'null-crew-member',
+            yearOfBirth: null,
+            yearOfDeath: null,
+          },
+        ],
+        page: { totalPages: 1 },
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchCharacters('null')).resolves.toEqual({
+      items: [
+        {
+          description:
+            'Gender: unknown. Birth year: unknown. Death year: unknown.',
+          detailsId: 'null-crew-member',
+          id: 'null-crew-member-0',
+          name: 'Null Crew Member',
+        },
+      ],
+      totalPages: 1,
+    });
+  });
+
+  it('uses a fallback id when uid is missing', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        characters: [
+          {
+            name: 'Unknown Crew Member',
+          },
+          {
+            name: 'Unknown Crew Member',
+          },
+        ],
+        page: { totalPages: 1 },
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchCharacters('unknown')).resolves.toMatchObject({
+      items: [
+        {
+          detailsId: 'Unknown Crew Member-0',
+          id: 'Unknown Crew Member-0',
+        },
+        {
+          detailsId: 'Unknown Crew Member-1',
+          id: 'Unknown Crew Member-1',
+        },
+      ],
     });
   });
 
@@ -181,8 +248,9 @@ describe('fetchCharacters', () => {
       birthYear: '2230',
       deathYear: 'unknown',
       description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
+      detailsId: 'spock',
       gender: 'Male',
-      id: 'spock',
+      id: 'spock-0',
       name: 'Spock',
     });
 
