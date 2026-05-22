@@ -1,10 +1,13 @@
-import { Component, type ChangeEvent, type FormEvent } from 'react';
+import {
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const SEARCH_STORAGE_KEY = 'searchTerm';
-
-interface SearchState {
-  value: string;
-}
 
 interface SearchProps {
   currentSearchTerm: string;
@@ -12,50 +15,57 @@ interface SearchProps {
   onSearch: (searchTerm: string) => void;
 }
 
-export class Search extends Component<SearchProps, SearchState> {
-  state: SearchState = {
-    value: '',
-  };
+export function Search({
+  currentSearchTerm,
+  onInitialSearchTerm,
+  onSearch,
+}: SearchProps) {
+  const [savedSearchTerm, setSavedSearchTerm] = useLocalStorage(
+    SEARCH_STORAGE_KEY,
+    ''
+  );
+  const initialSearchTerm = useRef(savedSearchTerm);
+  const didRunInitialSearch = useRef(false);
+  const [value, setValue] = useState(savedSearchTerm);
 
-  componentDidMount() {
-    const savedSearchTerm =
-      window.localStorage.getItem(SEARCH_STORAGE_KEY) ?? '';
-
-    this.setState({ value: savedSearchTerm });
-    this.props.onInitialSearchTerm(savedSearchTerm);
-  }
-
-  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ value: event.target.value });
-  };
-
-  handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const trimmedValue = this.state.value.trim();
-
-    if (trimmedValue === this.props.currentSearchTerm) {
+  useEffect(() => {
+    if (didRunInitialSearch.current) {
       return;
     }
 
-    window.localStorage.setItem(SEARCH_STORAGE_KEY, trimmedValue);
-    this.setState({ value: trimmedValue });
-    this.props.onSearch(trimmedValue);
+    didRunInitialSearch.current = true;
+    onInitialSearchTerm(initialSearchTerm.current);
+  }, [onInitialSearchTerm]);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
   };
 
-  render() {
-    return (
-      <section className="search-section">
-        <form className="search-form" onSubmit={this.handleSubmit}>
-          <input
-            aria-label="Search"
-            type="search"
-            value={this.state.value}
-            onChange={this.handleChange}
-          />
-          <button type="submit">Search</button>
-        </form>
-      </section>
-    );
-  }
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedValue = value.trim();
+
+    if (trimmedValue === currentSearchTerm) {
+      return;
+    }
+
+    setSavedSearchTerm(trimmedValue);
+    setValue(trimmedValue);
+    onSearch(trimmedValue);
+  };
+
+  return (
+    <section className="search-section">
+      <form className="search-form" onSubmit={handleSubmit}>
+        <input
+          aria-label="Search"
+          type="search"
+          value={value}
+          onChange={handleChange}
+        />
+        <button type="submit">Search</button>
+      </form>
+    </section>
+  );
 }

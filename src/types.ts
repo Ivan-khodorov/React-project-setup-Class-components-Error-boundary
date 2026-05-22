@@ -3,3 +3,9 @@ export interface Item {
   name: string;
   description: string;
 }
+
+export interface CharacterDetailsData extends Item {
+  gender: string;
+  birthYear: string;
+  deathYear: string;
+}
