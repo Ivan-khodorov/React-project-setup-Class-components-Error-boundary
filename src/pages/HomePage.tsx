@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router';
 import { Results } from '../components/Results';
 import { Search } from '../components/Search';
+import { SelectedItemsFlyout } from '../components/SelectedItemsFlyout';
 import { useHomePageController } from '../hooks/useHomePageController';
 
 export function HomePage() {
@@ -55,6 +56,7 @@ export function HomePage() {
         </div>
         {isDetailsOpen && <Outlet />}
       </div>
+      <SelectedItemsFlyout />
     </div>
   );
 }
