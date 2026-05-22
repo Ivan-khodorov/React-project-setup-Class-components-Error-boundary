@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <ErrorBoundary>
         <ThemeProvider>
-          <BrowserRouter>
+          <BrowserRouter basename="/React-project-setup-Class-components-Error-boundary">
             <App />
           </BrowserRouter>
         </ThemeProvider>
