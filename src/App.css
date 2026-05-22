@@ -44,6 +44,10 @@
 .app-header {
   width: min(100%, 1180px);
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   border: 1px solid #d7dce3;
   border-radius: 8px;
   padding: 14px 20px;
@@ -53,7 +57,34 @@
 
 .app-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
+}
+
+.theme-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: max-content;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.theme-selector legend {
+  padding: 0;
+  color: #4c5564;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.theme-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #172033;
+  font-size: 14px;
+  text-transform: capitalize;
 }
 
 .app-nav a,

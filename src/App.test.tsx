@@ -8,6 +8,7 @@ import {
   fetchCharacterDetails,
   fetchCharacters,
 } from './services/starTrekCharactersApi';
+import { ThemeProvider } from './context/ThemeProvider';
 import { selectedItemsReducer } from './store/selectedItemsSlice';
 
 vi.mock('./services/starTrekCharactersApi', () => ({
@@ -30,9 +31,11 @@ describe('App Integration', () => {
 
     return render(
       <Provider store={store}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <App />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter initialEntries={initialEntries}>
+            <App />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
   };
@@ -118,9 +121,11 @@ describe('App Integration', () => {
             },
           })}
         >
-          <MemoryRouter>
-            <App />
-          </MemoryRouter>
+          <ThemeProvider>
+            <MemoryRouter>
+              <App />
+            </MemoryRouter>
+          </ThemeProvider>
         </Provider>
       </ErrorBoundary>
     );
