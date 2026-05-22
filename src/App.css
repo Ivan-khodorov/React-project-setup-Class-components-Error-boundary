@@ -20,15 +20,24 @@
 .home-layout {
   width: min(100%, 1180px);
   margin: 0 auto;
-
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  gap: 24px;
-  align-items: start;
-}
-
-.master-panel {
   display: grid;
   gap: 24px;
+}
+
+.content-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  min-width: 0;
+}
+
+.content-layout--with-details {
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 32vw, 420px);
+}
+
+.main-panel {
+  min-width: 0;
 }
 
 .app-header {
@@ -265,11 +274,11 @@
     padding: 16px;
   }
 
-  .home-layout {
+  .search-form {
     grid-template-columns: 1fr;
   }
 
-  .search-form {
+  .content-layout--with-details {
     grid-template-columns: 1fr;
   }
 }

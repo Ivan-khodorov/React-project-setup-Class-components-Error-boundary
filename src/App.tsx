@@ -139,6 +139,15 @@ export default function App() {
     [currentPage, setSearchParams]
   );
 
+  const handleCloseDetails = useCallback(() => {
+    setSearchParams((prevSearchParams) => {
+      const nextSearchParams = new URLSearchParams(prevSearchParams);
+      nextSearchParams.delete(DETAILS_PARAM);
+
+      return nextSearchParams;
+    });
+  }, [setSearchParams]);
+
   const handleThrowError = useCallback(() => {
     setState((prevState) => ({ ...prevState, shouldThrowError: true }));
   }, []);
@@ -151,10 +160,12 @@ export default function App() {
     <HomePage
       currentPage={currentPage}
       error={state.error}
+      isDetailsOpen={Boolean(searchParams.get(DETAILS_PARAM))}
       isLoading={state.isLoading}
       items={state.items}
       onInitialSearchTerm={handleInitialSearchTerm}
       onPageChange={handlePageChange}
+      onCloseDetails={handleCloseDetails}
       onSearch={handleSearch}
       onSelectItem={handleSelectItem}
       onThrowError={handleThrowError}

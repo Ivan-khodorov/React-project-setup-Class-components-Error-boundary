@@ -6,8 +6,10 @@ import type { Item } from '../types';
 interface HomePageProps {
   currentPage: number;
   error: string;
+  isDetailsOpen: boolean;
   isLoading: boolean;
   items: Item[];
+  onCloseDetails: () => void;
   onInitialSearchTerm: (searchTerm: string) => void;
   onPageChange: (page: number) => void;
   onSearch: (searchTerm: string) => void;
@@ -20,8 +22,10 @@ interface HomePageProps {
 export function HomePage({
   currentPage,
   error,
+  isDetailsOpen,
   isLoading,
   items,
+  onCloseDetails,
   onInitialSearchTerm,
   onPageChange,
   onSearch,
@@ -30,26 +34,37 @@ export function HomePage({
   searchTerm,
   totalPages,
 }: HomePageProps) {
+  const contentLayoutClassName = isDetailsOpen
+    ? 'content-layout content-layout--with-details'
+    : 'content-layout';
+
   return (
-    <div className="home-layout">
-      <section className="master-panel">
-        <Search
-          currentSearchTerm={searchTerm}
-          onInitialSearchTerm={onInitialSearchTerm}
-          onSearch={onSearch}
-        />
-        <Results
-          currentPage={currentPage}
-          error={error}
-          isLoading={isLoading}
-          items={items}
-          onPageChange={onPageChange}
-          onSelectItem={onSelectItem}
-          onThrowError={onThrowError}
-          totalPages={totalPages}
-        />
-      </section>
-      <Outlet />
+    <div className="home-layout" onClick={onCloseDetails}>
+      <Search
+        currentSearchTerm={searchTerm}
+        onInitialSearchTerm={onInitialSearchTerm}
+        onSearch={onSearch}
+      />
+      <div className={contentLayoutClassName}>
+        <div
+          className="main-panel"
+          role="region"
+          aria-label="Main panel"
+          onClick={onCloseDetails}
+        >
+          <Results
+            currentPage={currentPage}
+            error={error}
+            isLoading={isLoading}
+            items={items}
+            onPageChange={onPageChange}
+            onSelectItem={onSelectItem}
+            onThrowError={onThrowError}
+            totalPages={totalPages}
+          />
+        </div>
+        {isDetailsOpen && <Outlet />}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type MouseEvent, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { fetchCharacterDetails } from '../services/starTrekCharactersApi';
 import type { CharacterDetailsData } from '../types';
@@ -63,8 +63,16 @@ export function CharacterDetails() {
     });
   };
 
+  const handlePanelClick = (event: MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+  };
+
   return (
-    <aside className="details-panel" aria-label="Character details">
+    <aside
+      className="details-panel"
+      aria-label="Character details"
+      onClick={handlePanelClick}
+    >
       <button type="button" onClick={handleClose}>
         Close
       </button>

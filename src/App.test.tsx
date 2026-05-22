@@ -186,6 +186,14 @@ describe('App Integration', () => {
       id: 'spock',
       name: 'Spock',
     });
+    vi.mocked(fetchCharacterDetails).mockResolvedValueOnce({
+      birthYear: '2230',
+      deathYear: 'unknown',
+      description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
+      gender: 'Male',
+      id: 'spock',
+      name: 'Spock',
+    });
 
     renderApp(['/?page=2']);
 
@@ -204,6 +212,30 @@ describe('App Integration', () => {
     expect(
       screen.getByRole('complementary', { name: /character details/i })
     ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('complementary', { name: /character details/i })
+    );
+
+    expect(
+      screen.getByRole('complementary', { name: /character details/i })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('region', { name: /main panel/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('complementary', { name: /character details/i })
+      ).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /view details/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('complementary', { name: /character details/i })
+      ).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /close/i }));
 
