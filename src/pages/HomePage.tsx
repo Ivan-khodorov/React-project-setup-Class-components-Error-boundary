@@ -1,42 +1,32 @@
 import { Outlet } from 'react-router';
 import { Results } from '../components/Results';
 import { Search } from '../components/Search';
-import type { Item } from '../types';
+import { useHomePageController } from '../hooks/useHomePageController';
 
-interface HomePageProps {
-  currentPage: number;
-  error: string;
-  isDetailsOpen: boolean;
-  isLoading: boolean;
-  items: Item[];
-  onCloseDetails: () => void;
-  onInitialSearchTerm: (searchTerm: string) => void;
-  onPageChange: (page: number) => void;
-  onSearch: (searchTerm: string) => void;
-  onSelectItem: (itemId: string) => void;
-  onThrowError: () => void;
-  searchTerm: string;
-  totalPages: number;
-}
-
-export function HomePage({
-  currentPage,
-  error,
-  isDetailsOpen,
-  isLoading,
-  items,
-  onCloseDetails,
-  onInitialSearchTerm,
-  onPageChange,
-  onSearch,
-  onSelectItem,
-  onThrowError,
-  searchTerm,
-  totalPages,
-}: HomePageProps) {
+export function HomePage() {
+  const {
+    currentPage,
+    error,
+    isDetailsOpen,
+    isLoading,
+    items,
+    onCloseDetails,
+    onInitialSearchTerm,
+    onPageChange,
+    onSearch,
+    onSelectItem,
+    onThrowError,
+    searchTerm,
+    shouldThrowError,
+    totalPages,
+  } = useHomePageController();
   const contentLayoutClassName = isDetailsOpen
     ? 'content-layout content-layout--with-details'
     : 'content-layout';
+
+  if (shouldThrowError) {
+    throw new Error('Test application error');
+  }
 
   return (
     <div className="home-layout" onClick={onCloseDetails}>
