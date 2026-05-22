@@ -14,17 +14,19 @@ interface CharactersApiResponse {
 interface CharacterApiItem {
   uid: string;
   name: string;
-  gender?: string;
-  yearOfBirth?: number;
-  yearOfDeath?: number;
+  gender?: string | null;
+  yearOfBirth?: number | null;
+  yearOfDeath?: number | null;
 }
 
 interface CharacterDetailsApiResponse {
   character: CharacterApiItem;
 }
 
-const formatValue = (value: string | number | undefined): string =>
-  value === undefined || value === '' ? 'unknown' : String(value);
+const formatValue = (value: string | number | null | undefined): string =>
+  value === null || value === undefined || value === ''
+    ? 'unknown'
+    : String(value);
 
 const toItem = (character: CharacterApiItem, index = 0): Item => {
   const fallbackId = `${character.name}-${index}`;

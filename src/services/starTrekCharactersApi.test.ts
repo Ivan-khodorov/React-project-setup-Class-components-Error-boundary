@@ -117,6 +117,39 @@ describe('fetchCharacters', () => {
     });
   });
 
+  it('uses unknown for null response fields', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        characters: [
+          {
+            gender: null,
+            name: 'Null Crew Member',
+            uid: 'null-crew-member',
+            yearOfBirth: null,
+            yearOfDeath: null,
+          },
+        ],
+        page: { totalPages: 1 },
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchCharacters('null')).resolves.toEqual({
+      items: [
+        {
+          description:
+            'Gender: unknown. Birth year: unknown. Death year: unknown.',
+          detailsId: 'null-crew-member',
+          id: 'null-crew-member-0',
+          name: 'Null Crew Member',
+        },
+      ],
+      totalPages: 1,
+    });
+  });
+
   it('uses a fallback id when uid is missing', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       json: vi.fn().mockResolvedValue({

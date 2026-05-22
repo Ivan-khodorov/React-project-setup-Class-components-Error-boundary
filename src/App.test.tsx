@@ -195,6 +195,12 @@ describe('App Integration', () => {
     await waitFor(() => {
       expect(fetchCharacters).toHaveBeenCalledWith('', 3);
     });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { current: 'page' })).toHaveTextContent(
+        '3'
+      );
+    });
   });
 
   it('opens and closes character details from the results list', async () => {

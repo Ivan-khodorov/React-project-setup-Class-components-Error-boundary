@@ -33,14 +33,21 @@ export function Card({ item, onSelectItem }: CardProps) {
   };
 
   return (
-    <article onClick={handleCardClick}>
-      <label onClick={(event: MouseEvent<HTMLLabelElement>) => event.stopPropagation()}>
+    <article
+      className={isSelected ? 'result-card result-card--selected' : 'result-card'}
+      onClick={handleCardClick}
+    >
+      <label
+        className="selection-control"
+        onClick={(event: MouseEvent<HTMLLabelElement>) => event.stopPropagation()}
+      >
         <input
           aria-label={`Select ${item.name}`}
           checked={isSelected}
           type="checkbox"
           onChange={handleSelectionChange}
         />
+        <span aria-hidden="true" className="selection-control__box" />
       </label>
       <h2>{item.name}</h2>
       <p>{item.description}</p>
