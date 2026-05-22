@@ -1,4 +1,6 @@
+import { configureStore } from '@reduxjs/toolkit';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import App from './App';
@@ -6,6 +8,7 @@ import {
   fetchCharacterDetails,
   fetchCharacters,
 } from './services/starTrekCharactersApi';
+import { selectedItemsReducer } from './store/selectedItemsSlice';
 
 vi.mock('./services/starTrekCharactersApi', () => ({
   fetchCharacterDetails: vi.fn(),
@@ -18,12 +21,21 @@ describe('App Integration', () => {
     vi.clearAllMocks();
   });
 
-  const renderApp = (initialEntries = ['/']) =>
-    render(
-      <MemoryRouter initialEntries={initialEntries}>
-        <App />
-      </MemoryRouter>
+  const renderApp = (initialEntries = ['/']) => {
+    const store = configureStore({
+      reducer: {
+        selectedItems: selectedItemsReducer,
+      },
+    });
+
+    return render(
+      <Provider store={store}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <App />
+        </MemoryRouter>
+      </Provider>
     );
+  };
 
   it('loads initial search term from localStorage on mount', async () => {
     window.localStorage.setItem('searchTerm', 'spock');
@@ -99,9 +111,17 @@ describe('App Integration', () => {
 
     render(
       <ErrorBoundary>
-        <MemoryRouter>
-          <App />
-        </MemoryRouter>
+        <Provider
+          store={configureStore({
+            reducer: {
+              selectedItems: selectedItemsReducer,
+            },
+          })}
+        >
+          <MemoryRouter>
+            <App />
+          </MemoryRouter>
+        </Provider>
       </ErrorBoundary>
     );
 
