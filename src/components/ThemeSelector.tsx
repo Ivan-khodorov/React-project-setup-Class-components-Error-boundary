@@ -8,9 +8,16 @@ export function ThemeSelector() {
 
   return (
     <fieldset className="theme-selector" aria-label="Theme selection">
-      <legend>Theme</legend>
+      <legend className="theme-selector__legend">Theme</legend>
       {themes.map((themeOption) => (
-        <label key={themeOption}>
+        <label
+          className={
+            theme === themeOption
+              ? 'theme-selector__option theme-selector__option--active'
+              : 'theme-selector__option'
+          }
+          key={themeOption}
+        >
           <input
             checked={theme === themeOption}
             name="theme"
@@ -18,7 +25,7 @@ export function ThemeSelector() {
             value={themeOption}
             onChange={() => setTheme(themeOption)}
           />
-          {themeOption}
+          <span>{themeOption}</span>
         </label>
       ))}
     </fieldset>
