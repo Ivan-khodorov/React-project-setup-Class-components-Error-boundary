@@ -10,6 +10,7 @@ import {
 import type { SelectedItem } from '../types';
 
 const spock: SelectedItem = {
+  detailsId: 'spock',
   description: 'Science officer',
   detailsUrl: '/?details=spock',
   id: 'spock',
@@ -17,6 +18,7 @@ const spock: SelectedItem = {
 };
 
 const kirk: SelectedItem = {
+  detailsId: 'kirk',
   description: 'Captain',
   detailsUrl: '/?details=kirk',
   id: 'kirk',

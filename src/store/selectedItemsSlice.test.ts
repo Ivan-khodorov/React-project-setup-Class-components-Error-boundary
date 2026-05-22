@@ -14,6 +14,7 @@ import type { RootState } from './store';
 import type { SelectedItem } from '../types';
 
 const spock: SelectedItem = {
+  detailsId: 'spock',
   description: 'Vulcan science officer',
   detailsUrl: '/?page=1&details=spock',
   id: 'spock',
@@ -21,6 +22,7 @@ const spock: SelectedItem = {
 };
 
 const kirk: SelectedItem = {
+  detailsId: 'kirk',
   description: 'Captain of the Enterprise',
   detailsUrl: '/?page=1&details=kirk',
   id: 'kirk',

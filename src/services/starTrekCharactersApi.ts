@@ -26,11 +26,17 @@ interface CharacterDetailsApiResponse {
 const formatValue = (value: string | number | undefined): string =>
   value === undefined || value === '' ? 'unknown' : String(value);
 
-const toItem = (character: CharacterApiItem): Item => ({
-  id: character.uid,
-  name: character.name,
-  description: `Gender: ${formatValue(character.gender)}. Birth year: ${formatValue(character.yearOfBirth)}. Death year: ${formatValue(character.yearOfDeath)}.`,
-});
+const toItem = (character: CharacterApiItem, index = 0): Item => {
+  const fallbackId = `${character.name}-${index}`;
+  const detailsId = character.uid || fallbackId;
+
+  return {
+    detailsId,
+    id: character.uid ? `${character.uid}-${index}` : fallbackId,
+    name: character.name,
+    description: `Gender: ${formatValue(character.gender)}. Birth year: ${formatValue(character.yearOfBirth)}. Death year: ${formatValue(character.yearOfDeath)}.`,
+  };
+};
 
 const toCharacterDetails = (
   character: CharacterApiItem

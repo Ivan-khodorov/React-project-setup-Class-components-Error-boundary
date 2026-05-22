@@ -7,6 +7,7 @@ import { selectedItemsReducer } from '../store/selectedItemsSlice';
 import type { Item } from '../types';
 
 const item: Item = {
+  detailsId: 'spock',
   id: 'spock',
   name: 'Spock',
   description: 'Science officer aboard the USS Enterprise.',

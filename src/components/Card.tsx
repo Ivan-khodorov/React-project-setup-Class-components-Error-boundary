@@ -19,12 +19,12 @@ export function Card({ item, onSelectItem }: CardProps) {
 
   const selectedItem = {
     ...item,
-    detailsUrl: `/?details=${encodeURIComponent(item.id)}`,
+    detailsUrl: `/?details=${encodeURIComponent(item.detailsId)}`,
   };
 
   const handleCardClick = (event: MouseEvent<HTMLElement>) => {
     event.stopPropagation();
-    onSelectItem(item.id);
+    onSelectItem(item.detailsId);
   };
 
   const handleSelectionChange = (event: ChangeEvent<HTMLInputElement>) => {

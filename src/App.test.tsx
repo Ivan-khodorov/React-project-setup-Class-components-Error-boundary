@@ -52,8 +52,8 @@ describe('App Integration', () => {
 
   it('shows loading state and then renders results', async () => {
     const mockItems = [
-      { id: '1', name: 'Spock', description: 'Vulcan' },
-      { id: '2', name: 'Kirk', description: 'Captain' },
+      { detailsId: '1', id: '1', name: 'Spock', description: 'Vulcan' },
+      { detailsId: '2', id: '2', name: 'Kirk', description: 'Captain' },
     ];
     vi.mocked(fetchCharacters).mockResolvedValueOnce({
       items: mockItems,
@@ -80,7 +80,7 @@ describe('App Integration', () => {
 
   it('executes full search flow: input -> click -> results', async () => {
     const mockItems = [
-      { id: '3', name: 'Uhura', description: 'Communications' },
+      { detailsId: '3', id: '3', name: 'Uhura', description: 'Communications' },
     ];
     vi.mocked(fetchCharacters).mockResolvedValueOnce({
       items: [],
@@ -165,7 +165,7 @@ describe('App Integration', () => {
   });
 
   it('loads the page from the URL and changes pages from pagination', async () => {
-    const mockItems = [{ id: '1', name: 'Spock', description: 'Vulcan' }];
+    const mockItems = [{ detailsId: '1', id: '1', name: 'Spock', description: 'Vulcan' }];
     vi.mocked(fetchCharacters).mockResolvedValueOnce({
       items: mockItems,
       totalPages: 3,
@@ -193,7 +193,7 @@ describe('App Integration', () => {
   });
 
   it('opens and closes character details from the results list', async () => {
-    const mockItems = [{ id: 'spock', name: 'Spock', description: 'Vulcan' }];
+    const mockItems = [{ detailsId: 'spock', id: 'spock', name: 'Spock', description: 'Vulcan' }];
     vi.mocked(fetchCharacters).mockResolvedValueOnce({
       items: mockItems,
       totalPages: 1,
@@ -202,6 +202,7 @@ describe('App Integration', () => {
       birthYear: '2230',
       deathYear: 'unknown',
       description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
+      detailsId: 'spock',
       gender: 'Male',
       id: 'spock',
       name: 'Spock',
@@ -210,6 +211,7 @@ describe('App Integration', () => {
       birthYear: '2230',
       deathYear: 'unknown',
       description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
+      detailsId: 'spock',
       gender: 'Male',
       id: 'spock',
       name: 'Spock',
@@ -267,7 +269,7 @@ describe('App Integration', () => {
   });
 
   it('persists selected items across page navigation', async () => {
-    const mockItems = [{ id: 'spock', name: 'Spock', description: 'Vulcan' }];
+    const mockItems = [{ detailsId: 'spock', id: 'spock', name: 'Spock', description: 'Vulcan' }];
     vi.mocked(fetchCharacters).mockResolvedValue({
       items: mockItems,
       totalPages: 1,
@@ -293,5 +295,30 @@ describe('App Integration', () => {
     expect(
       await screen.findByRole('checkbox', { name: /select spock/i })
     ).toBeChecked();
+  });
+
+  it('displays the count for multiple selected items', async () => {
+    const mockItems = [
+      { detailsId: 'spock', id: 'spock', name: 'Spock', description: 'Vulcan' },
+      { detailsId: 'kirk', id: 'kirk', name: 'Kirk', description: 'Captain' },
+    ];
+    vi.mocked(fetchCharacters).mockResolvedValueOnce({
+      items: mockItems,
+      totalPages: 1,
+    });
+
+    renderApp();
+
+    fireEvent.click(
+      await screen.findByRole('checkbox', { name: /select spock/i })
+    );
+    fireEvent.click(screen.getByRole('checkbox', { name: /select kirk/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('2 selected')).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('checkbox', { name: /select spock/i })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /select kirk/i })).toBeChecked();
   });
 });

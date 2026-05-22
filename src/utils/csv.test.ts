@@ -3,6 +3,7 @@ import { createSelectedItemsCsv } from './csv';
 import type { SelectedItem } from '../types';
 
 const spock: SelectedItem = {
+  detailsId: 'spock',
   description: 'Science officer',
   detailsUrl: '/?details=spock',
   id: 'spock',
@@ -18,6 +19,7 @@ describe('createSelectedItemsCsv', () => {
 
   it('creates multiple rows', () => {
     const kirk: SelectedItem = {
+      detailsId: 'kirk',
       description: 'Captain',
       detailsUrl: '/?details=kirk',
       id: 'kirk',
@@ -31,6 +33,7 @@ describe('createSelectedItemsCsv', () => {
 
   it('escapes csv values with quotes, commas, and line breaks', () => {
     const item: SelectedItem = {
+      detailsId: 'number-one',
       description: 'Line one\nLine "two"',
       detailsUrl: '/?details=number-one',
       id: 'number-one',

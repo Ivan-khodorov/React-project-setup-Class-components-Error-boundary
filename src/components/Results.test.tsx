@@ -46,6 +46,7 @@ describe('Results', () => {
         isLoading={false}
         items={[
           {
+            detailsId: 'spock',
             id: 'spock',
             name: 'Spock',
             description: 'Science officer aboard the USS Enterprise.',
@@ -102,6 +103,7 @@ describe('Results', () => {
         isLoading={false}
         items={[
           {
+            detailsId: 'spock',
             id: 'spock',
             name: 'Spock',
             description: 'Science officer aboard the USS Enterprise.',
