@@ -265,4 +265,33 @@ describe('App Integration', () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  it('persists selected items across page navigation', async () => {
+    const mockItems = [{ id: 'spock', name: 'Spock', description: 'Vulcan' }];
+    vi.mocked(fetchCharacters).mockResolvedValue({
+      items: mockItems,
+      totalPages: 1,
+    });
+
+    renderApp();
+
+    const checkbox = await screen.findByRole('checkbox', {
+      name: /select spock/i,
+    });
+    fireEvent.click(checkbox);
+
+    await waitFor(() => {
+      expect(checkbox).toBeChecked();
+    });
+
+    fireEvent.click(screen.getByRole('link', { name: /about/i }));
+
+    expect(screen.getByRole('heading', { name: /about/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('link', { name: /home/i }));
+
+    expect(
+      await screen.findByRole('checkbox', { name: /select spock/i })
+    ).toBeChecked();
+  });
 });
