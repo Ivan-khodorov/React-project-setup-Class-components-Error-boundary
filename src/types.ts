@@ -4,6 +4,10 @@ export interface Item {
   description: string;
 }
 
+export interface SelectedItem extends Item {
+  detailsUrl: string;
+}
+
 export interface CharacterDetailsData extends Item {
   gender: string;
   birthYear: string;
