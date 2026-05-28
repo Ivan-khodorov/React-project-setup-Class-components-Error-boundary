@@ -1,14 +1,17 @@
 import { type MouseEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import {
+  starTrekCharactersApi,
   useGetCharacterDetailsQuery,
   type StarTrekApiError,
 } from '../services/starTrekCharactersApi';
+import { useAppDispatch } from '../store/hooks';
 
 const DETAILS_PARAM = 'details';
 const UNKNOWN_VALUE = 'unknown';
 
 export function CharacterDetails() {
+  const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get(DETAILS_PARAM);
   const detailsQuery = useGetCharacterDetailsQuery(detailsId ?? '', {
@@ -30,6 +33,14 @@ export function CharacterDetails() {
 
       return nextSearchParams;
     });
+  };
+
+  const handleRefresh = () => {
+    dispatch(
+      starTrekCharactersApi.util.invalidateTags([
+        { type: 'CharacterDetails', id: detailsId },
+      ])
+    );
   };
 
   const handlePanelClick = (event: MouseEvent<HTMLElement>) => {
@@ -54,13 +65,22 @@ export function CharacterDetails() {
           <p className="details-panel__eyebrow">Character details</p>
           <h2>{panelTitle}</h2>
         </div>
-        <button
-          className="details-panel__close"
-          type="button"
-          onClick={handleClose}
-        >
-          Close
-        </button>
+        <div className="details-panel__actions">
+          <button
+            className="details-panel__button"
+            type="button"
+            onClick={handleRefresh}
+          >
+            Refresh
+          </button>
+          <button
+            className="details-panel__button"
+            type="button"
+            onClick={handleClose}
+          >
+            Close
+          </button>
+        </div>
       </header>
       {isLoading && <div role="status">Loading details...</div>}
       {!isLoading && error && <div role="alert">{error}</div>}

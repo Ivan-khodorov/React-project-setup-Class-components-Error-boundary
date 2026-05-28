@@ -128,4 +128,24 @@ describe('CharacterDetails', () => {
     expect(screen.getByRole('heading', { name: 'Spock' })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('invalidates cached details when Refresh is clicked', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(createDetailsResponse())
+      .mockResolvedValueOnce(createDetailsResponse());
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderDetails();
+
+    expect(
+      await screen.findByRole('heading', { name: 'Spock' })
+    ).toBeInTheDocument();
+
+    screen.getByRole('button', { name: /refresh/i }).click();
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
 });

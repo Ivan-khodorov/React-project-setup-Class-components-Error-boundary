@@ -173,12 +173,8 @@ export const starTrekCharactersApi = createApi({
     }),
     getCharacters: build.query<CharactersResult, CharactersQueryArgs>({
       keepUnusedDataFor: getApiCacheTtlSeconds(),
-      providesTags: (result, _error, args) => [
+      providesTags: (_result, _error, args) => [
         { type: 'CharactersList', id: getCharactersListCacheId(args) },
-        ...(result?.items.map((item) => ({
-          type: 'CharacterDetails' as const,
-          id: item.detailsId,
-        })) ?? []),
       ],
       queryFn: async (args) => {
         try {

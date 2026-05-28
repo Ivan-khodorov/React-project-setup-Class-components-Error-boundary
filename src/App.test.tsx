@@ -1,5 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -368,6 +374,47 @@ describe('App Integration', () => {
       expect(
         screen.queryByRole('complementary', { name: /character details/i })
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it('refreshes character details by invalidating the details cache', async () => {
+    const fetchMock = createFetchMock(
+      [createListResponse([spockItem], 1)],
+      [
+        createDetailsResponse({
+          gender: 'Male',
+          name: 'Spock',
+          uid: 'spock',
+          yearOfBirth: 2230,
+        }),
+        createDetailsResponse({
+          gender: 'Male',
+          name: 'Spock',
+          uid: 'spock',
+          yearOfBirth: 2230,
+        }),
+      ]
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderApp();
+
+    fireEvent.click(await screen.findByRole('button', { name: /view details/i }));
+
+    expect(
+      await screen.findByRole('complementary', { name: /character details/i })
+    ).toBeInTheDocument();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    fireEvent.click(
+      within(
+        screen.getByRole('complementary', { name: /character details/i })
+      ).getByRole('button', { name: /refresh/i })
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(3);
     });
   });
 
