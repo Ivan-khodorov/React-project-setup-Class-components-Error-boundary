@@ -17,7 +17,7 @@ const createTestStore = () =>
     },
   });
 
-const fetchCharacters = async (args: CharactersQueryArgs) => {
+const dispatchCharactersQuery = async (args: CharactersQueryArgs) => {
   const store = createTestStore();
 
   return store.dispatch(
@@ -25,7 +25,7 @@ const fetchCharacters = async (args: CharactersQueryArgs) => {
   );
 };
 
-const fetchCharacterDetails = async (characterId: string) => {
+const dispatchCharacterDetailsQuery = async (characterId: string) => {
   const store = createTestStore();
 
   return store.dispatch(
@@ -65,7 +65,7 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchCharacters({ searchTerm: '' });
+    await dispatchCharactersQuery({ searchTerm: '' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
@@ -93,7 +93,7 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchCharacters({ searchTerm: '  spock  ' });
+    await dispatchCharactersQuery({ searchTerm: '  spock  ' });
 
     const [, requestInit] = fetchMock.mock.calls[0];
 
@@ -121,7 +121,9 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters({ searchTerm: 'spock' })).resolves.toMatchObject({
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'spock' })
+    ).resolves.toMatchObject({
       data: {
         items: [
           {
@@ -154,7 +156,9 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters({ searchTerm: 'unknown' })).resolves.toMatchObject({
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'unknown' })
+    ).resolves.toMatchObject({
       data: {
         items: [
           {
@@ -189,7 +193,9 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters({ searchTerm: 'null' })).resolves.toMatchObject({
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'null' })
+    ).resolves.toMatchObject({
       data: {
         items: [
           {
@@ -222,7 +228,9 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters({ searchTerm: 'unknown' })).resolves.toMatchObject({
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'unknown' })
+    ).resolves.toMatchObject({
       data: {
         items: [
           {
@@ -246,7 +254,9 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters({ searchTerm: 'spock' })).resolves.toMatchObject({
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'spock' })
+    ).resolves.toMatchObject({
       error: { message: 'Request failed with status 503.' },
       isError: true,
     });
@@ -263,7 +273,9 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters({ searchTerm: 'spock' })).resolves.toMatchObject({
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'spock' })
+    ).resolves.toMatchObject({
       error: { message: 'Unexpected response format.' },
       isError: true,
     });
@@ -280,7 +292,7 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchCharacters({ page: 3, searchTerm: '' });
+    await dispatchCharactersQuery({ page: 3, searchTerm: '' });
 
     const [requestUrl] = fetchMock.mock.calls[0];
 
@@ -302,7 +314,7 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacterDetails('spock')).resolves.toMatchObject({
+    await expect(dispatchCharacterDetailsQuery('spock')).resolves.toMatchObject({
       data: {
         birthYear: '2230',
         deathYear: 'unknown',
@@ -330,7 +342,7 @@ describe('starTrekCharactersApi', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacterDetails('spock')).resolves.toMatchObject({
+    await expect(dispatchCharacterDetailsQuery('spock')).resolves.toMatchObject({
       error: { message: 'Unexpected response format.' },
       isError: true,
     });
