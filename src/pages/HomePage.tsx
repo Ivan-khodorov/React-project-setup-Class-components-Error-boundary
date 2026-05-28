@@ -14,6 +14,7 @@ export function HomePage() {
     onCloseDetails,
     onInitialSearchTerm,
     onPageChange,
+    onRefreshCharacters,
     onSearch,
     onSelectItem,
     onThrowError,
@@ -49,6 +50,7 @@ export function HomePage() {
             isLoading={isLoading}
             items={items}
             onPageChange={onPageChange}
+            onRefresh={onRefreshCharacters}
             onSelectItem={onSelectItem}
             onThrowError={onThrowError}
             totalPages={totalPages}

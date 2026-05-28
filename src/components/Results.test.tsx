@@ -24,6 +24,7 @@ describe('Results', () => {
         isLoading={true}
         items={[]}
         onPageChange={vi.fn()}
+        onRefresh={vi.fn()}
         onSelectItem={vi.fn()}
         onThrowError={vi.fn()}
         totalPages={0}
@@ -38,6 +39,7 @@ describe('Results', () => {
 
   it('displays items and calls the error callback', () => {
     const onThrowError = vi.fn();
+    const onRefresh = vi.fn();
 
     renderWithStore(
       <Results
@@ -53,6 +55,7 @@ describe('Results', () => {
           },
         ]}
         onPageChange={vi.fn()}
+        onRefresh={onRefresh}
         onSelectItem={vi.fn()}
         onThrowError={onThrowError}
         totalPages={1}
@@ -69,6 +72,10 @@ describe('Results', () => {
     screen.getByRole('button', { name: /test error/i }).click();
 
     expect(onThrowError).toHaveBeenCalledTimes(1);
+
+    screen.getByRole('button', { name: /refresh/i }).click();
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
   it('displays the error state', () => {
@@ -79,6 +86,7 @@ describe('Results', () => {
         isLoading={false}
         items={[]}
         onPageChange={vi.fn()}
+        onRefresh={vi.fn()}
         onSelectItem={vi.fn()}
         onThrowError={vi.fn()}
         totalPages={0}
@@ -110,6 +118,7 @@ describe('Results', () => {
           },
         ]}
         onPageChange={onPageChange}
+        onRefresh={vi.fn()}
         onSelectItem={vi.fn()}
         onThrowError={vi.fn()}
         totalPages={3}

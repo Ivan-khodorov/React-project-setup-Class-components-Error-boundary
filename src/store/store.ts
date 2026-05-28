@@ -1,11 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { starTrekCharactersApi } from '../services/starTrekCharactersApi';
 import { selectedItemsReducer } from './selectedItemsSlice';
 
+const reducer = {
+  selectedItems: selectedItemsReducer,
+  [starTrekCharactersApi.reducerPath]: starTrekCharactersApi.reducer,
+};
+
 export const store = configureStore({
-  reducer: {
-    selectedItems: selectedItemsReducer,
-  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(starTrekCharactersApi.middleware),
+  reducer,
 });
 
-export type RootState = ReturnType<typeof store.getState>;
+type StoreState = ReturnType<typeof store.getState>;
+
+export type RootState = Pick<StoreState, 'selectedItems'> &
+  Partial<Pick<StoreState, typeof starTrekCharactersApi.reducerPath>>;
 export type AppDispatch = typeof store.dispatch;

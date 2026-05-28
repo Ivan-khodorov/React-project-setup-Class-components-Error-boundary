@@ -1,8 +1,10 @@
+import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { CharacterDetailsData, Item } from '../types';
 
 const CHARACTERS_API_URL = 'https://stapi.co/api/v1/rest/character/search';
 const CHARACTER_DETAILS_API_URL = 'https://stapi.co/api/v1/rest/character';
 const PAGE_SIZE = '10';
+export const DEFAULT_API_CACHE_TTL_SECONDS = 300;
 
 interface CharactersApiResponse {
   characters: CharacterApiItem[];
@@ -21,6 +23,20 @@ interface CharacterApiItem {
 
 interface CharacterDetailsApiResponse {
   character: CharacterApiItem;
+}
+
+export interface CharactersQueryArgs {
+  searchTerm: string;
+  page?: number;
+}
+
+export interface StarTrekApiError {
+  message: string;
+}
+
+export interface CharactersResult {
+  items: Item[];
+  totalPages: number;
 }
 
 const formatValue = (value: string | number | null | undefined): string =>
@@ -49,15 +65,30 @@ const toCharacterDetails = (
   gender: formatValue(character.gender),
 });
 
-export interface CharactersResult {
-  items: Item[];
-  totalPages: number;
-}
+export const getApiCacheTtlSeconds = (
+  value = import.meta.env.VITE_API_CACHE_TTL_SECONDS
+): number => {
+  const parsedValue = Number(value);
 
-export const fetchCharacters = async (
-  searchTerm: string,
-  page = 1
-): Promise<CharactersResult> => {
+  return Number.isFinite(parsedValue) && parsedValue >= 0
+    ? parsedValue
+    : DEFAULT_API_CACHE_TTL_SECONDS;
+};
+
+export const getCharactersListCacheId = ({
+  page = 1,
+  searchTerm,
+}: CharactersQueryArgs): string => `${searchTerm.trim()}::${Math.max(page, 1)}`;
+
+const toApiError = (error: unknown, fallbackMessage: string): StarTrekApiError =>
+  error instanceof Error
+    ? { message: error.message }
+    : { message: fallbackMessage };
+
+const requestCharacters = async ({
+  page = 1,
+  searchTerm,
+}: CharactersQueryArgs): Promise<CharactersResult> => {
   const url = new URL(CHARACTERS_API_URL);
   const trimmedSearchTerm = searchTerm.trim();
   const apiPage = Math.max(page, 1) - 1;
@@ -98,7 +129,7 @@ export const fetchCharacters = async (
   };
 };
 
-export const fetchCharacterDetails = async (
+const requestCharacterDetails = async (
   characterId: string
 ): Promise<CharacterDetailsData> => {
   const url = new URL(CHARACTER_DETAILS_API_URL);
@@ -118,3 +149,44 @@ export const fetchCharacterDetails = async (
 
   return toCharacterDetails(data.character);
 };
+
+export const starTrekCharactersApi = createApi({
+  baseQuery: fakeBaseQuery<StarTrekApiError>(),
+  endpoints: (build) => ({
+    getCharacterDetails: build.query<CharacterDetailsData, string>({
+      keepUnusedDataFor: getApiCacheTtlSeconds(),
+      providesTags: (_result, _error, characterId) => [
+        { type: 'CharacterDetails', id: characterId },
+      ],
+      queryFn: async (characterId) => {
+        try {
+          return { data: await requestCharacterDetails(characterId) };
+        } catch (error) {
+          return {
+            error: toApiError(error, 'Failed to load character details.'),
+          };
+        }
+      },
+    }),
+    getCharacters: build.query<CharactersResult, CharactersQueryArgs>({
+      keepUnusedDataFor: getApiCacheTtlSeconds(),
+      providesTags: (_result, _error, args) => [
+        { type: 'CharactersList', id: getCharactersListCacheId(args) },
+      ],
+      queryFn: async (args) => {
+        try {
+          return { data: await requestCharacters(args) };
+        } catch (error) {
+          return { error: toApiError(error, 'Failed to load results.') };
+        }
+      },
+    }),
+  }),
+  reducerPath: 'starTrekCharactersApi',
+  tagTypes: ['CharactersList', 'CharacterDetails'],
+});
+
+export const {
+  useGetCharacterDetailsQuery,
+  useGetCharactersQuery,
+} = starTrekCharactersApi;

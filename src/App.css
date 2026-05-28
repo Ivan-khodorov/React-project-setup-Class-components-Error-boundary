@@ -235,6 +235,7 @@
 
 .search-form input,
 .search-form button,
+.refresh-button,
 .test-error-button,
 .pagination button {
   min-height: 40px;
@@ -251,6 +252,7 @@
 }
 
 .search-form button,
+.refresh-button,
 .test-error-button {
   border: 1px solid var(--color-primary-hover);
   padding: 0 16px;
@@ -260,8 +262,15 @@
 }
 
 .search-form button:hover,
+.refresh-button:hover,
 .test-error-button:hover {
   background: var(--color-primary-hover);
+}
+
+.refresh-button {
+  display: block;
+  width: fit-content;
+  margin: 0 0 16px auto;
 }
 
 .pagination {
@@ -452,6 +461,13 @@
   margin-bottom: 18px;
 }
 
+.details-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .details-panel__eyebrow {
   margin: 0 0 6px;
   color: var(--color-text-muted);
@@ -467,7 +483,7 @@
   line-height: 1.2;
 }
 
-.details-panel__close {
+.details-panel__button {
   min-height: 34px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -477,7 +493,7 @@
   cursor: pointer;
 }
 
-.details-panel__close:hover {
+.details-panel__button:hover {
   border-color: var(--color-primary-hover);
   color: var(--color-primary-text);
   background: var(--color-primary);

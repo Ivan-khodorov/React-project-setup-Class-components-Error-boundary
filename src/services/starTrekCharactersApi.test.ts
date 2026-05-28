@@ -1,9 +1,57 @@
+import { configureStore } from '@reduxjs/toolkit';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchCharacterDetails, fetchCharacters } from './starTrekCharactersApi';
+import {
+  DEFAULT_API_CACHE_TTL_SECONDS,
+  getApiCacheTtlSeconds,
+  getCharactersListCacheId,
+  starTrekCharactersApi,
+  type CharactersQueryArgs,
+} from './starTrekCharactersApi';
 
-describe('fetchCharacters', () => {
+const createTestStore = () =>
+  configureStore({
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(starTrekCharactersApi.middleware),
+    reducer: {
+      [starTrekCharactersApi.reducerPath]: starTrekCharactersApi.reducer,
+    },
+  });
+
+const dispatchCharactersQuery = async (args: CharactersQueryArgs) => {
+  const store = createTestStore();
+
+  return store.dispatch(
+    starTrekCharactersApi.endpoints.getCharacters.initiate(args)
+  );
+};
+
+const dispatchCharacterDetailsQuery = async (characterId: string) => {
+  const store = createTestStore();
+
+  return store.dispatch(
+    starTrekCharactersApi.endpoints.getCharacterDetails.initiate(characterId)
+  );
+};
+
+describe('starTrekCharactersApi', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('uses a configurable cache TTL with a fallback value', () => {
+    expect(getApiCacheTtlSeconds('60')).toBe(60);
+    expect(getApiCacheTtlSeconds('0')).toBe(0);
+    expect(getApiCacheTtlSeconds('invalid')).toBe(
+      DEFAULT_API_CACHE_TTL_SECONDS
+    );
+    expect(getApiCacheTtlSeconds('-1')).toBe(DEFAULT_API_CACHE_TTL_SECONDS);
+  });
+
+  it('creates a stable list cache id from trimmed search term and page', () => {
+    expect(
+      getCharactersListCacheId({ page: 2, searchTerm: '  spock  ' })
+    ).toBe('spock::2');
+    expect(getCharactersListCacheId({ page: -1, searchTerm: '' })).toBe('::1');
   });
 
   it('sends a POST request with default pagination', async () => {
@@ -17,7 +65,7 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchCharacters('');
+    await dispatchCharactersQuery({ searchTerm: '' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
@@ -45,7 +93,7 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchCharacters('  spock  ');
+    await dispatchCharactersQuery({ searchTerm: '  spock  ' });
 
     const [, requestInit] = fetchMock.mock.calls[0];
 
@@ -73,17 +121,22 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('spock')).resolves.toEqual({
-      items: [
-        {
-          description:
-            'Gender: Male. Birth year: 2230. Death year: unknown.',
-          detailsId: 'spock',
-          id: 'spock-0',
-          name: 'Spock',
-        },
-      ],
-      totalPages: 3,
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'spock' })
+    ).resolves.toMatchObject({
+      data: {
+        items: [
+          {
+            description:
+              'Gender: Male. Birth year: 2230. Death year: unknown.',
+            detailsId: 'spock',
+            id: 'spock-0',
+            name: 'Spock',
+          },
+        ],
+        totalPages: 3,
+      },
+      isSuccess: true,
     });
   });
 
@@ -103,17 +156,21 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('unknown')).resolves.toEqual({
-      items: [
-        {
-          description:
-            'Gender: unknown. Birth year: unknown. Death year: unknown.',
-          detailsId: 'unknown-crew-member',
-          id: 'unknown-crew-member-0',
-          name: 'Unknown Crew Member',
-        },
-      ],
-      totalPages: 1,
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'unknown' })
+    ).resolves.toMatchObject({
+      data: {
+        items: [
+          {
+            description:
+              'Gender: unknown. Birth year: unknown. Death year: unknown.',
+            detailsId: 'unknown-crew-member',
+            id: 'unknown-crew-member-0',
+            name: 'Unknown Crew Member',
+          },
+        ],
+        totalPages: 1,
+      },
     });
   });
 
@@ -136,17 +193,20 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('null')).resolves.toEqual({
-      items: [
-        {
-          description:
-            'Gender: unknown. Birth year: unknown. Death year: unknown.',
-          detailsId: 'null-crew-member',
-          id: 'null-crew-member-0',
-          name: 'Null Crew Member',
-        },
-      ],
-      totalPages: 1,
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'null' })
+    ).resolves.toMatchObject({
+      data: {
+        items: [
+          {
+            description:
+              'Gender: unknown. Birth year: unknown. Death year: unknown.',
+            detailsId: 'null-crew-member',
+            id: 'null-crew-member-0',
+            name: 'Null Crew Member',
+          },
+        ],
+      },
     });
   });
 
@@ -168,21 +228,25 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('unknown')).resolves.toMatchObject({
-      items: [
-        {
-          detailsId: 'Unknown Crew Member-0',
-          id: 'Unknown Crew Member-0',
-        },
-        {
-          detailsId: 'Unknown Crew Member-1',
-          id: 'Unknown Crew Member-1',
-        },
-      ],
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'unknown' })
+    ).resolves.toMatchObject({
+      data: {
+        items: [
+          {
+            detailsId: 'Unknown Crew Member-0',
+            id: 'Unknown Crew Member-0',
+          },
+          {
+            detailsId: 'Unknown Crew Member-1',
+            id: 'Unknown Crew Member-1',
+          },
+        ],
+      },
     });
   });
 
-  it('throws on non-ok responses', async () => {
+  it('returns a readable error on non-ok list responses', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       status: 503,
@@ -190,12 +254,15 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('spock')).rejects.toThrow(
-      'Request failed with status 503.'
-    );
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'spock' })
+    ).resolves.toMatchObject({
+      error: { message: 'Request failed with status 503.' },
+      isError: true,
+    });
   });
 
-  it('throws on unexpected response formats', async () => {
+  it('returns a readable error on unexpected list response formats', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       json: vi.fn().mockResolvedValue({
         characters: null,
@@ -206,9 +273,12 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacters('spock')).rejects.toThrow(
-      'Unexpected response format.'
-    );
+    await expect(
+      dispatchCharactersQuery({ searchTerm: 'spock' })
+    ).resolves.toMatchObject({
+      error: { message: 'Unexpected response format.' },
+      isError: true,
+    });
   });
 
   it('converts UI page number to zero-based API page number', async () => {
@@ -222,7 +292,7 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchCharacters('', 3);
+    await dispatchCharactersQuery({ page: 3, searchTerm: '' });
 
     const [requestUrl] = fetchMock.mock.calls[0];
 
@@ -244,18 +314,37 @@ describe('fetchCharacters', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(fetchCharacterDetails('spock')).resolves.toEqual({
-      birthYear: '2230',
-      deathYear: 'unknown',
-      description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
-      detailsId: 'spock',
-      gender: 'Male',
-      id: 'spock-0',
-      name: 'Spock',
+    await expect(dispatchCharacterDetailsQuery('spock')).resolves.toMatchObject({
+      data: {
+        birthYear: '2230',
+        deathYear: 'unknown',
+        description: 'Gender: Male. Birth year: 2230. Death year: unknown.',
+        detailsId: 'spock',
+        gender: 'Male',
+        id: 'spock-0',
+        name: 'Spock',
+      },
+      isSuccess: true,
     });
 
     const [requestUrl] = fetchMock.mock.calls[0];
 
     expect(requestUrl.searchParams.get('uid')).toBe('spock');
+  });
+
+  it('returns a readable error on unexpected details response formats', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        character: null,
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(dispatchCharacterDetailsQuery('spock')).resolves.toMatchObject({
+      error: { message: 'Unexpected response format.' },
+      isError: true,
+    });
   });
 });
