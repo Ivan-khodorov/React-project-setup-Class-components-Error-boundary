@@ -1,15 +1,17 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { fetchCharacters } from '../services/starTrekCharactersApi';
-import type { Item } from '../types';
+import {
+  getCharactersListCacheId,
+  starTrekCharactersApi,
+  useGetCharactersQuery,
+  type StarTrekApiError,
+} from '../services/starTrekCharactersApi';
+import { useAppDispatch } from '../store/hooks';
 
 interface HomePageState {
-  error: string;
-  isLoading: boolean;
-  items: Item[];
+  hasInitializedSearch: boolean;
   searchTerm: string;
   shouldThrowError: boolean;
-  totalPages: number;
 }
 
 const PAGE_PARAM = 'page';
@@ -22,17 +24,29 @@ const getValidPage = (pageValue: string | null): number => {
 };
 
 export function useHomePageController() {
-  const latestRequestId = useRef(0);
+  const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = getValidPage(searchParams.get(PAGE_PARAM));
   const [state, setState] = useState<HomePageState>({
-    error: '',
-    isLoading: false,
-    items: [],
+    hasInitializedSearch: false,
     searchTerm: '',
     shouldThrowError: false,
-    totalPages: 0,
   });
+  const charactersQueryArgs = useMemo(
+    () => ({
+      page: currentPage,
+      searchTerm: state.searchTerm,
+    }),
+    [currentPage, state.searchTerm]
+  );
+  const charactersQuery = useGetCharactersQuery(charactersQueryArgs, {
+    skip: !state.hasInitializedSearch,
+  });
+  const charactersError = charactersQuery.error as StarTrekApiError | undefined;
+  const items = charactersQuery.data?.items ?? [];
+  const totalPages = charactersQuery.data?.totalPages ?? 0;
+  const isLoading = charactersQuery.isLoading && !charactersQuery.data;
+  const error = charactersError?.message ?? '';
 
   const updatePageParam = useCallback(
     (page: number) => {
@@ -46,66 +60,28 @@ export function useHomePageController() {
     [setSearchParams]
   );
 
-  const loadCharacters = useCallback(
-    async (searchTerm: string, page: number) => {
-      const requestId = latestRequestId.current + 1;
-
-      latestRequestId.current = requestId;
-      setState((prevState) => ({
-        ...prevState,
-        error: '',
-        isLoading: true,
-      }));
-
-      try {
-        const result = await fetchCharacters(searchTerm, page);
-
-        if (requestId !== latestRequestId.current) {
-          return;
-        }
-
-        setState((prevState) => ({
-          ...prevState,
-          items: result.items,
-          isLoading: false,
-          totalPages: result.totalPages,
-        }));
-      } catch (error) {
-        if (requestId !== latestRequestId.current) {
-          return;
-        }
-
-        const message =
-          error instanceof Error ? error.message : 'Failed to load results.';
-
-        setState((prevState) => ({
-          ...prevState,
-          error: message,
-          isLoading: false,
-          items: [],
-          totalPages: 0,
-        }));
-      }
-    },
-    []
-  );
-
   const handleSearch = useCallback(
     (searchTerm: string) => {
-      setState((prevState) => ({ ...prevState, searchTerm }));
+      setState((prevState) => ({
+        ...prevState,
+        hasInitializedSearch: true,
+        searchTerm,
+      }));
       updatePageParam(1);
-      void loadCharacters(searchTerm, 1);
     },
-    [loadCharacters, updatePageParam]
+    [updatePageParam]
   );
 
   const handleInitialSearchTerm = useCallback(
     (searchTerm: string) => {
-      setState((prevState) => ({ ...prevState, searchTerm }));
+      setState((prevState) => ({
+        ...prevState,
+        hasInitializedSearch: true,
+        searchTerm,
+      }));
       updatePageParam(currentPage);
-      void loadCharacters(searchTerm, currentPage);
     },
-    [currentPage, loadCharacters, updatePageParam]
+    [currentPage, updatePageParam]
   );
 
   const handlePageChange = useCallback(
@@ -116,10 +92,20 @@ export function useHomePageController() {
 
         return nextSearchParams;
       });
-      void loadCharacters(state.searchTerm, page);
     },
-    [loadCharacters, setSearchParams, state.searchTerm]
+    [setSearchParams]
   );
+
+  const handleRefreshCharacters = useCallback(() => {
+    dispatch(
+      starTrekCharactersApi.util.invalidateTags([
+        {
+          type: 'CharactersList',
+          id: getCharactersListCacheId(charactersQueryArgs),
+        },
+      ])
+    );
+  }, [charactersQueryArgs, dispatch]);
 
   const handleSelectItem = useCallback(
     (itemId: string) => {
@@ -149,18 +135,19 @@ export function useHomePageController() {
 
   return {
     currentPage,
-    error: state.error,
+    error,
     isDetailsOpen: Boolean(searchParams.get(DETAILS_PARAM)),
-    isLoading: state.isLoading,
-    items: state.items,
+    isLoading,
+    items,
     onCloseDetails: handleCloseDetails,
     onInitialSearchTerm: handleInitialSearchTerm,
     onPageChange: handlePageChange,
+    onRefreshCharacters: handleRefreshCharacters,
     onSearch: handleSearch,
     onSelectItem: handleSelectItem,
     onThrowError: handleThrowError,
     searchTerm: state.searchTerm,
     shouldThrowError: state.shouldThrowError,
-    totalPages: state.totalPages,
+    totalPages,
   };
 }

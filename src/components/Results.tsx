@@ -10,6 +10,7 @@ interface ResultsProps {
   isLoading: boolean;
   items: Item[];
   onPageChange: (page: number) => void;
+  onRefresh: () => void;
   onSelectItem: (itemId: string) => void;
   onThrowError: () => void;
   totalPages: number;
@@ -21,6 +22,7 @@ export function Results({
   isLoading,
   items,
   onPageChange,
+  onRefresh,
   onSelectItem,
   onThrowError,
   totalPages,
@@ -35,9 +37,16 @@ export function Results({
     </button>
   );
 
+  const renderRefreshButton = () => (
+    <button className="refresh-button" type="button" onClick={onRefresh}>
+      Refresh
+    </button>
+  );
+
   if (isLoading) {
     return (
       <section className="results-section">
+        {renderRefreshButton()}
         <Loader />
         {renderTestButton()}
       </section>
@@ -47,6 +56,7 @@ export function Results({
   if (error) {
     return (
       <section className="results-section">
+        {renderRefreshButton()}
         <ErrorMessage message={error} />
         {renderTestButton()}
       </section>
@@ -55,6 +65,7 @@ export function Results({
 
   return (
     <section className="results-section">
+      {renderRefreshButton()}
       {items.map((item) => (
         <Card key={item.id} item={item} onSelectItem={onSelectItem} />
       ))}
