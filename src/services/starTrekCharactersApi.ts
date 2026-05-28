@@ -153,8 +153,6 @@ const requestCharacterDetails = async (
 export const fetchCharacters = (searchTerm: string, page = 1) =>
   requestCharacters({ page, searchTerm });
 
-export const fetchCharacterDetails = requestCharacterDetails;
-
 export const starTrekCharactersApi = createApi({
   baseQuery: fakeBaseQuery<StarTrekApiError>(),
   endpoints: (build) => ({
