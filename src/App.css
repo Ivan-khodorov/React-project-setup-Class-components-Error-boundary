@@ -761,6 +761,13 @@
   background: var(--color-primary-hover);
 }
 
+.profile-form__submit:disabled {
+  border-color: var(--color-border);
+  color: var(--color-disabled);
+  background: var(--color-disabled-background);
+  cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
   .app {
     padding: 16px;

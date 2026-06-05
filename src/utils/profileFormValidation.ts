@@ -112,12 +112,16 @@ export const createProfileFormSchema = (countries: string[]) =>
         .trim()
         .min(1, 'Email is required.')
         .refine(validateBasicEmail, 'Enter a valid email address.'),
-      gender: z.enum(['female', 'male', 'other'], {
-        error: 'Gender is required.',
-      }),
+      gender: z
+        .union([z.enum(['female', 'male', 'other']), z.literal('')])
+        .refine((gender) => gender !== '', 'Gender is required.'),
       image: z
-        .custom<File>(isFile, 'Image is required.')
-        .refine((file) => validateImageFile(file) === null, {
+        .custom<File | null>(
+          (value) => value === null || isFile(value),
+          'Image is required.'
+        )
+        .refine((file) => file !== null, 'Image is required.')
+        .refine((file) => file === null || validateImageFile(file) === null, {
           message: 'Image must be a PNG or JPEG file up to 1 MB.',
         }),
       name: z
@@ -129,9 +133,9 @@ export const createProfileFormSchema = (countries: string[]) =>
           'Name must start with an uppercase letter.'
         ),
       password: z.string().min(1, 'Password is required.'),
-      terms: z.literal(true, {
-        error: 'Terms and Conditions must be accepted.',
-      }),
+      terms: z
+        .boolean()
+        .refine(Boolean, 'Terms and Conditions must be accepted.'),
     })
     .superRefine((values, context) => {
       if (values.password !== values.confirmPassword) {
