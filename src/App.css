@@ -649,6 +649,118 @@
   padding: 20px;
 }
 
+.profile-form {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.profile-form__field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.profile-form__field label,
+.profile-form__field legend,
+.profile-form__terms label {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile-form__field input {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 4px;
+  padding: 0 12px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+}
+
+.profile-form__field input[type='file'] {
+  padding: 8px 12px;
+}
+
+.profile-form__radio-group {
+  align-content: start;
+}
+
+.profile-form__radio-group label,
+.profile-form__terms label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.profile-form__radio-group input,
+.profile-form__terms input {
+  min-height: auto;
+}
+
+.profile-form__error {
+  min-height: 18px;
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.password-strength {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.password-strength__item {
+  min-height: 24px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 4px;
+  padding: 3px 6px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.password-strength__item--met {
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+}
+
+.profile-form__submit {
+  min-height: 40px;
+  width: fit-content;
+  border: 1px solid var(--color-primary-hover);
+  border-radius: 4px;
+  padding: 0 16px;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.profile-form__submit:hover,
+.profile-form__submit:focus-visible {
+  background: var(--color-primary-hover);
+}
+
 @media (max-width: 640px) {
   .app {
     padding: 16px;
@@ -683,5 +795,10 @@
 
   .modal-dialog {
     max-height: calc(100vh - 32px);
+  }
+
+  .profile-form__grid,
+  .password-strength {
+    grid-template-columns: 1fr;
   }
 }
