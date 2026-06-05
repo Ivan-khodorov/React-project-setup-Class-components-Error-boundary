@@ -583,6 +583,72 @@
   background: var(--color-primary-hover);
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 52%);
+}
+
+.modal-dialog {
+  width: min(100%, 680px);
+  max-height: min(720px, 90vh);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-flyout);
+  overflow: hidden;
+}
+
+.modal-dialog:focus {
+  outline: 2px solid var(--color-primary-hover);
+  outline-offset: 2px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-border-soft);
+  padding: 18px 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.modal-close-button {
+  min-height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0 12px;
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+  cursor: pointer;
+}
+
+.modal-close-button:hover,
+.modal-close-button:focus-visible {
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+}
+
+.modal-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 20px;
+}
+
 @media (max-width: 640px) {
   .app {
     padding: 16px;
@@ -608,5 +674,14 @@
 
   .selected-items-flyout div {
     flex-direction: column;
+  }
+
+  .modal-overlay {
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .modal-dialog {
+    max-height: calc(100vh - 32px);
   }
 }
