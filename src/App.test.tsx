@@ -13,6 +13,7 @@ import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeProvider';
 import { starTrekCharactersApi } from './services/starTrekCharactersApi';
+import { profileFormsReducer } from './store/profileFormsSlice';
 import { selectedItemsReducer } from './store/selectedItemsSlice';
 import type { Item } from './types';
 
@@ -99,6 +100,7 @@ describe('App Integration', () => {
       middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(starTrekCharactersApi.middleware),
       reducer: {
+        profileForms: profileFormsReducer,
         selectedItems: selectedItemsReducer,
         [starTrekCharactersApi.reducerPath]: starTrekCharactersApi.reducer,
       },
@@ -187,41 +189,20 @@ describe('App Integration', () => {
     );
   });
 
-  it('shows error boundary fallback when "Test error" button is clicked', async () => {
+  it('shows error boundary fallback when a child throws', () => {
+    const ThrowError = () => {
+      throw new Error('Test application error');
+    };
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.stubGlobal('fetch', createFetchMock([createListResponse([])]));
 
     render(
       <ErrorBoundary>
-        <Provider
-          store={configureStore({
-            middleware: (getDefaultMiddleware) =>
-              getDefaultMiddleware().concat(starTrekCharactersApi.middleware),
-            reducer: {
-              selectedItems: selectedItemsReducer,
-              [starTrekCharactersApi.reducerPath]:
-                starTrekCharactersApi.reducer,
-            },
-          })}
-        >
-          <ThemeProvider>
-            <MemoryRouter>
-              <App />
-            </MemoryRouter>
-          </ThemeProvider>
-        </Provider>
+        <ThrowError />
       </ErrorBoundary>
     );
 
-    const errorButton = await screen.findByRole('button', {
-      name: /test error/i,
-    });
-    fireEvent.click(errorButton);
-
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.getByText('Something went wrong.')).toBeInTheDocument();
-    });
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong.')).toBeInTheDocument();
 
     consoleSpy.mockRestore();
   });

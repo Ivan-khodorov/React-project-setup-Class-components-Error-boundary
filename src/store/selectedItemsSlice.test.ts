@@ -30,6 +30,11 @@ const kirk: SelectedItem = {
 };
 
 const createRootState = (items: SelectedItem[]): RootState => ({
+  profileForms: {
+    countries: [],
+    latestSubmissionId: null,
+    submissions: [],
+  },
   selectedItems: { items },
 });
 

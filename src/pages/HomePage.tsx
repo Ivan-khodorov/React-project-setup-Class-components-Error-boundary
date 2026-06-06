@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router';
+import { ProfileFormsPanel } from '../components/ProfileFormsPanel';
 import { Results } from '../components/Results';
 import { Search } from '../components/Search';
 import { SelectedItemsFlyout } from '../components/SelectedItemsFlyout';
@@ -37,6 +38,7 @@ export function HomePage() {
         onInitialSearchTerm={onInitialSearchTerm}
         onSearch={onSearch}
       />
+      <ProfileFormsPanel />
       <div className={contentLayoutClassName}>
         <div
           className="main-panel"

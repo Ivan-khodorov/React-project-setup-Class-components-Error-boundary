@@ -31,7 +31,10 @@ export function Results({
     <button
       className="test-error-button"
       type="button"
-      onClick={onThrowError}
+      onClick={(event) => {
+        event.stopPropagation();
+        onThrowError();
+      }}
     >
       Test error
     </button>

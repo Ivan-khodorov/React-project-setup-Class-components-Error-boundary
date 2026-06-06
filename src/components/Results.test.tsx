@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { describe, expect, it, vi } from 'vitest';
 import { Results } from './Results';
@@ -37,29 +37,32 @@ describe('Results', () => {
     ).toBeInTheDocument();
   });
 
-  it('displays items and calls the error callback', () => {
+  it('displays items and calls the error callback without bubbling the click', () => {
     const onThrowError = vi.fn();
     const onRefresh = vi.fn();
+    const onContainerClick = vi.fn();
 
     renderWithStore(
-      <Results
-        currentPage={1}
-        error=""
-        isLoading={false}
-        items={[
-          {
-            detailsId: 'spock',
-            id: 'spock',
-            name: 'Spock',
-            description: 'Science officer aboard the USS Enterprise.',
-          },
-        ]}
-        onPageChange={vi.fn()}
-        onRefresh={onRefresh}
-        onSelectItem={vi.fn()}
-        onThrowError={onThrowError}
-        totalPages={1}
-      />
+      <div onClick={onContainerClick}>
+        <Results
+          currentPage={1}
+          error=""
+          isLoading={false}
+          items={[
+            {
+              detailsId: 'spock',
+              id: 'spock',
+              name: 'Spock',
+              description: 'Science officer aboard the USS Enterprise.',
+            },
+          ]}
+          onPageChange={vi.fn()}
+          onRefresh={onRefresh}
+          onSelectItem={vi.fn()}
+          onThrowError={onThrowError}
+          totalPages={1}
+        />
+      </div>
     );
 
     expect(
@@ -69,11 +72,12 @@ describe('Results', () => {
       screen.getByText('Science officer aboard the USS Enterprise.')
     ).toBeInTheDocument();
 
-    screen.getByRole('button', { name: /test error/i }).click();
+    fireEvent.click(screen.getByRole('button', { name: /test error/i }));
 
     expect(onThrowError).toHaveBeenCalledTimes(1);
+    expect(onContainerClick).not.toHaveBeenCalled();
 
-    screen.getByRole('button', { name: /refresh/i }).click();
+    fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
