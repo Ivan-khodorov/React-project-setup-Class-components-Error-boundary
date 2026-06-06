@@ -3,7 +3,7 @@ name: Deploy to gh-pages
 on:
   push:
     branches:
-      - api-queries
+      - forms
   workflow_dispatch:
 
 permissions:
