@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { countries } from '../data/countries';
 import type { ProfileSubmission } from '../types';
 import {
   addSubmission,
@@ -15,7 +16,7 @@ const submission: ProfileSubmission = {
   country: 'Canada',
   createdAt: '2026-06-05T00:00:00.000Z',
   email: 'Jean@example.com',
-  gender: 'other',
+  gender: 'female',
   id: 'submission-1',
   imageBase64: 'data:image/png;base64,image',
   imageName: 'profile.png',
@@ -70,5 +71,15 @@ describe('profileFormsSlice', () => {
     expect(selectCountries(state)).toContain('Canada');
     expect(selectFormSubmissions(state)).toEqual([submission]);
     expect(selectLatestSubmissionId(state)).toBe('submission-1');
+  });
+
+  it('exposes the expanded countries list from the shared data source', () => {
+    const state = createRootState();
+
+    expect(selectCountries(state)).toEqual([...countries]);
+    expect(selectCountries(state)).toContain('Mexico');
+    expect(selectCountries(state)).toContain('New Zealand');
+    expect(selectCountries(state)).toContain('South Africa');
+    expect(selectCountries(state).length).toBeGreaterThan(100);
   });
 });

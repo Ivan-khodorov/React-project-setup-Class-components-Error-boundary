@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useId } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import type { PasswordStrength, ProfileFormValues } from '../types';
@@ -14,6 +14,13 @@ import {
   fileToBase64,
   getPasswordStrength,
 } from '../utils/profileFormValidation';
+import {
+  clearProfileFormDraft,
+  createProfileFormDraftFromValues,
+  readProfileFormDraft,
+  saveProfileFormDraft,
+} from '../utils/profileFormDraft';
+import { CountryAutocomplete } from './CountryAutocomplete';
 
 interface ReactHookProfileFormProps {
   onSuccess: () => void;
@@ -41,24 +48,34 @@ const defaultValues: ProfileFormValues = {
   terms: false,
 };
 
+const createDefaultValues = (): ProfileFormValues => ({
+  ...defaultValues,
+  ...readProfileFormDraft('react-hook-form'),
+});
+
 export function ReactHookProfileForm({ onSuccess }: ReactHookProfileFormProps) {
   const countries = useAppSelector(selectCountries);
   const dispatch = useAppDispatch();
+  const femaleGenderRef = useRef<HTMLInputElement>(null);
   const formId = useId();
+  const maleGenderRef = useRef<HTMLInputElement>(null);
+  const initialValues = useMemo(() => createDefaultValues(), []);
   const {
     formState: { errors },
     handleSubmit,
     control,
-    register,
     reset,
     setValue,
     trigger,
+    register,
   } = useForm<ProfileFormValues>({
-    defaultValues,
+    defaultValues: initialValues,
     mode: 'onChange',
     resolver: zodResolver(createProfileFormSchema(countries)),
   });
   const watchedValues = useWatch({ control });
+  const femaleGenderRegistration = register('gender');
+  const maleGenderRegistration = register('gender');
   const passwordStrength = getPasswordStrength(watchedValues.password ?? '');
   const hasRequiredValues =
     Boolean(watchedValues.name?.trim()) &&
@@ -72,6 +89,36 @@ export function ReactHookProfileForm({ onSuccess }: ReactHookProfileFormProps) {
     watchedValues.terms === true;
   const hasValidationErrors = Object.keys(errors).length > 0;
   const getFieldId = (fieldName: string) => `${formId}-${fieldName}`;
+
+  const handleGenderKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    direction: 'female-to-male' | 'male-to-female'
+  ) => {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    if (direction === 'female-to-male' && !event.shiftKey) {
+      event.preventDefault();
+      maleGenderRef.current?.focus();
+      return;
+    }
+
+    if (direction === 'male-to-female' && event.shiftKey) {
+      event.preventDefault();
+      femaleGenderRef.current?.focus();
+    }
+  };
+
+  useEffect(() => {
+    saveProfileFormDraft(
+      'react-hook-form',
+      createProfileFormDraftFromValues({
+        ...defaultValues,
+        ...watchedValues,
+      })
+    );
+  }, [watchedValues]);
 
   const onSubmit = async (values: ProfileFormValues) => {
     if (!values.image) {
@@ -91,6 +138,7 @@ export function ReactHookProfileForm({ onSuccess }: ReactHookProfileFormProps) {
       )
     );
     reset(defaultValues);
+    clearProfileFormDraft('react-hook-form');
     onSuccess();
   };
 
@@ -124,29 +172,40 @@ export function ReactHookProfileForm({ onSuccess }: ReactHookProfileFormProps) {
           <label htmlFor={getFieldId('gender-female')}>
             <input
               id={getFieldId('gender-female')}
+              name={femaleGenderRegistration.name}
+              ref={(element) => {
+                femaleGenderRegistration.ref(element);
+                femaleGenderRef.current = element;
+              }}
+              tabIndex={0}
               type="radio"
               value="female"
-              {...register('gender')}
+              onBlur={femaleGenderRegistration.onBlur}
+              onChange={femaleGenderRegistration.onChange}
+              onKeyDown={(event) =>
+                handleGenderKeyDown(event, 'female-to-male')
+              }
             />
             Female
           </label>
           <label htmlFor={getFieldId('gender-male')}>
             <input
               id={getFieldId('gender-male')}
+              name={maleGenderRegistration.name}
+              ref={(element) => {
+                maleGenderRegistration.ref(element);
+                maleGenderRef.current = element;
+              }}
+              tabIndex={0}
               type="radio"
               value="male"
-              {...register('gender')}
+              onBlur={maleGenderRegistration.onBlur}
+              onChange={maleGenderRegistration.onChange}
+              onKeyDown={(event) =>
+                handleGenderKeyDown(event, 'male-to-female')
+              }
             />
             Male
-          </label>
-          <label htmlFor={getFieldId('gender-other')}>
-            <input
-              id={getFieldId('gender-other')}
-              type="radio"
-              value="other"
-              {...register('gender')}
-            />
-            Other
           </label>
           <p className="profile-form__error">{errors.gender?.message}</p>
         </fieldset>
@@ -174,21 +233,25 @@ export function ReactHookProfileForm({ onSuccess }: ReactHookProfileFormProps) {
 
         <div className="profile-form__field">
           <label htmlFor={getFieldId('country')}>Country</label>
-          <input
+          <CountryAutocomplete
+            countries={countries}
             id={getFieldId('country')}
-            list={getFieldId('country-options')}
-            type="text"
-            {...register('country')}
+            value={watchedValues.country ?? ''}
+            onBlur={() => {
+              void trigger('country');
+            }}
+            onValueChange={(country) => {
+              setValue('country', country, {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true,
+              });
+            }}
           />
-          <datalist id={getFieldId('country-options')}>
-            {countries.map((country) => (
-              <option key={country} value={country} />
-            ))}
-          </datalist>
           <p className="profile-form__error">{errors.country?.message}</p>
         </div>
 
-        <div className="profile-form__field">
+        <div className="profile-form__field profile-form__password-field">
           <label htmlFor={getFieldId('password')}>Password</label>
           <input
             id={getFieldId('password')}
@@ -212,7 +275,7 @@ export function ReactHookProfileForm({ onSuccess }: ReactHookProfileFormProps) {
           <p className="profile-form__error">{errors.password?.message}</p>
         </div>
 
-        <div className="profile-form__field">
+        <div className="profile-form__field profile-form__confirm-password-field">
           <label htmlFor={getFieldId('confirmPassword')}>
             Confirm password
           </label>

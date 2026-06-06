@@ -17,7 +17,7 @@ export interface CharacterDetailsData extends Item {
 
 export type ProfileFormSource = 'uncontrolled' | 'react-hook-form';
 
-export type ProfileGender = 'female' | 'male' | 'other';
+export type ProfileGender = 'female' | 'male';
 
 export interface PasswordStrength {
   hasLowercase: boolean;
@@ -35,6 +35,15 @@ export interface ProfileFormValues {
   image: File | null;
   name: string;
   password: string;
+  terms: boolean;
+}
+
+export interface ProfileFormDraft {
+  age: string;
+  country: string;
+  email: string;
+  gender: ProfileGender | '';
+  name: string;
   terms: boolean;
 }
 

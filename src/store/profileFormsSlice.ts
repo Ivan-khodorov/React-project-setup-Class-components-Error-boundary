@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { countries } from '../data/countries';
 import type { ProfileSubmission } from '../types';
 import type { RootState } from './store';
 
@@ -9,18 +10,7 @@ interface ProfileFormsState {
 }
 
 const initialState: ProfileFormsState = {
-  countries: [
-    'Argentina',
-    'Australia',
-    'Brazil',
-    'Canada',
-    'France',
-    'Germany',
-    'India',
-    'Japan',
-    'United Kingdom',
-    'United States',
-  ],
+  countries: [...countries],
   latestSubmissionId: null,
   submissions: [],
 };

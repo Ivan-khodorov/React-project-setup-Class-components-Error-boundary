@@ -113,7 +113,7 @@ export const createProfileFormSchema = (countries: string[]) =>
         .min(1, 'Email is required.')
         .refine(validateBasicEmail, 'Enter a valid email address.'),
       gender: z
-        .union([z.enum(['female', 'male', 'other']), z.literal('')])
+        .union([z.enum(['female', 'male']), z.literal('')])
         .refine((gender) => gender !== '', 'Gender is required.'),
       image: z
         .custom<File | null>(
@@ -157,7 +157,7 @@ export const createProfileSubmission = (params: {
   country: normalizeCountry(params.values.country),
   createdAt: new Date().toISOString(),
   email: params.values.email.trim(),
-  gender: params.values.gender || 'other',
+  gender: params.values.gender || 'female',
   id: crypto.randomUUID(),
   imageBase64: params.imageBase64,
   imageName: params.imageName,

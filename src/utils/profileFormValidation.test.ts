@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { countries as expandedCountries } from '../data/countries';
 import type { ProfileFormValues } from '../types';
 import {
   createProfileFormSchema,
@@ -32,7 +33,7 @@ const validValues = (image = createImage()): ProfileFormValues => ({
   confirmPassword: 'Password1!',
   country: 'Canada',
   email: 'Jean@example.com',
-  gender: 'other',
+  gender: 'female',
   image,
   name: 'Jean',
   password: 'Password1!',
@@ -96,6 +97,24 @@ describe('profileFormValidation utilities', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts countries from the expanded shared countries source', () => {
+    const result = createProfileFormSchema([...expandedCountries]).safeParse({
+      ...validValues(),
+      country: 'South Africa',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects countries that are not in the expanded shared countries source', () => {
+    const result = createProfileFormSchema([...expandedCountries]).safeParse({
+      ...validValues(),
+      country: 'Atlantis',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects invalid shared schema values', () => {
     const result = createProfileFormSchema(countries).safeParse({
       ...validValues(createImage({ name: 'profile.gif', type: 'image/gif' })),
@@ -149,7 +168,7 @@ describe('profileFormValidation utilities', () => {
       age: 32,
       country: 'Canada',
       email: 'Jean@example.com',
-      gender: 'other',
+      gender: 'female',
       id: '00000000-0000-4000-8000-000000000000',
       imageBase64: 'data:image/png;base64,image',
       imageName: 'profile.png',

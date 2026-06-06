@@ -53,7 +53,7 @@ const fillValidForm = (options?: { country?: string; name?: string }) => {
   fireEvent.change(screen.getByLabelText('Email'), {
     target: { value: 'Jean@example.com' },
   });
-  fireEvent.click(screen.getByLabelText('Other'));
+  fireEvent.click(screen.getByLabelText('Female'));
   fireEvent.change(screen.getByLabelText('Profile image'), {
     target: { files: [createImage()] },
   });
@@ -163,7 +163,7 @@ describe('ProfileFormsPanel', () => {
       country: 'Canada',
       createdAt: '2026-06-05T00:00:00.000Z',
       email: 'Jean@example.com',
-      gender: 'other',
+      gender: 'female',
       id: 'profile-submission-1',
       imageBase64: 'data:image/png;base64,cHJvZmlsZQ==',
       imageName: 'profile.png',

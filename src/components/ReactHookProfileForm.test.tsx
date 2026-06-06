@@ -4,6 +4,10 @@ import { Provider } from 'react-redux';
 import { describe, expect, it, vi } from 'vitest';
 import { profileFormsReducer } from '../store/profileFormsSlice';
 import { selectedItemsReducer } from '../store/selectedItemsSlice';
+import {
+  emptyProfileFormDraft,
+  readProfileFormDraft,
+} from '../utils/profileFormDraft';
 import { ReactHookProfileForm } from './ReactHookProfileForm';
 
 const createImage = (options?: { name?: string; type?: string }) =>
@@ -22,13 +26,13 @@ const createTestStore = () =>
 const renderForm = (onSuccess = vi.fn()) => {
   const store = createTestStore();
 
-  render(
+  const view = render(
     <Provider store={store}>
       <ReactHookProfileForm onSuccess={onSuccess} />
     </Provider>
   );
 
-  return { onSuccess, store };
+  return { ...view, onSuccess, store };
 };
 
 const fillValidForm = () => {
@@ -41,7 +45,7 @@ const fillValidForm = () => {
   fireEvent.change(screen.getByLabelText('Email'), {
     target: { value: 'Jean@example.com' },
   });
-  fireEvent.click(screen.getByLabelText('Other'));
+  fireEvent.click(screen.getByLabelText('Female'));
   fireEvent.change(screen.getByLabelText('Profile image'), {
     target: { files: [createImage()] },
   });
@@ -66,7 +70,9 @@ describe('ReactHookProfileForm', () => {
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Female')).toBeInTheDocument();
     expect(screen.getByLabelText('Male')).toBeInTheDocument();
-    expect(screen.getByLabelText('Other')).toBeInTheDocument();
+    expect(screen.getByLabelText('Female')).toHaveAttribute('tabindex', '0');
+    expect(screen.getByLabelText('Male')).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByLabelText('Other')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Profile image')).toBeInTheDocument();
     expect(screen.getByLabelText('Country')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
@@ -142,7 +148,7 @@ describe('ReactHookProfileForm', () => {
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'Jean@example.com' },
     });
-    fireEvent.click(screen.getByLabelText('Other'));
+    fireEvent.click(screen.getByLabelText('Female'));
     fireEvent.change(screen.getByLabelText('Profile image'), {
       target: { files: [createImage()] },
     });
@@ -183,6 +189,73 @@ describe('ReactHookProfileForm', () => {
     );
   });
 
+  it('moves keyboard focus between gender options with Tab and Shift Tab', () => {
+    renderForm();
+
+    const femaleInput = screen.getByLabelText('Female');
+    const maleInput = screen.getByLabelText('Male');
+
+    femaleInput.focus();
+    fireEvent.keyDown(femaleInput, { key: 'Tab' });
+
+    expect(maleInput).toHaveFocus();
+
+    fireEvent.keyDown(maleInput, { key: 'Tab', shiftKey: true });
+
+    expect(femaleInput).toHaveFocus();
+  });
+
+  it('restores safe draft fields after remount without restoring password or image', async () => {
+    const { unmount } = renderForm();
+
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Jean' },
+    });
+    fireEvent.change(screen.getByLabelText('Age'), {
+      target: { value: '32' },
+    });
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'Jean@example.com' },
+    });
+    fireEvent.click(screen.getByLabelText('Female'));
+    fireEvent.change(screen.getByLabelText('Profile image'), {
+      target: { files: [createImage()] },
+    });
+    fireEvent.change(screen.getByLabelText('Country'), {
+      target: { value: 'Canada' },
+    });
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'Password1!' },
+    });
+    fireEvent.change(screen.getByLabelText('Confirm password'), {
+      target: { value: 'Password1!' },
+    });
+    fireEvent.click(screen.getByLabelText('Accept Terms and Conditions'));
+
+    await waitFor(() =>
+      expect(readProfileFormDraft('react-hook-form')).toMatchObject({
+        country: 'Canada',
+        email: 'Jean@example.com',
+        gender: 'female',
+        name: 'Jean',
+        terms: true,
+      })
+    );
+
+    unmount();
+    renderForm();
+
+    expect(screen.getByLabelText('Name')).toHaveValue('Jean');
+    expect(screen.getByLabelText('Age')).toHaveValue(32);
+    expect(screen.getByLabelText('Email')).toHaveValue('Jean@example.com');
+    expect(screen.getByLabelText('Female')).toBeChecked();
+    expect(screen.getByLabelText('Country')).toHaveValue('Canada');
+    expect(screen.getByLabelText('Accept Terms and Conditions')).toBeChecked();
+    expect(screen.getByLabelText('Password')).toHaveValue('');
+    expect(screen.getByLabelText('Confirm password')).toHaveValue('');
+    expect(screen.getByLabelText('Profile image')).toHaveValue('');
+  });
+
   it('submits valid data to Redux, resets the form, and closes through onSuccess', async () => {
     const { onSuccess, store } = renderForm();
     const submitButton = screen.getByRole('button', {
@@ -202,7 +275,7 @@ describe('ReactHookProfileForm', () => {
       age: 32,
       country: 'Canada',
       email: 'Jean@example.com',
-      gender: 'other',
+      gender: 'female',
       imageName: 'profile.png',
       name: 'Jean',
       source: 'react-hook-form',
@@ -213,5 +286,8 @@ describe('ReactHookProfileForm', () => {
     );
     expect(screen.getByLabelText('Name')).toHaveValue('');
     expect(screen.getByLabelText('Password')).toHaveValue('');
+    expect(readProfileFormDraft('react-hook-form')).toEqual(
+      emptyProfileFormDraft
+    );
   });
 });

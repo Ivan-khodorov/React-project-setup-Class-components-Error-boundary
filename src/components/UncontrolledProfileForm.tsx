@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from 'react';
 import type {
   PasswordStrength,
+  ProfileFormDraft,
   ProfileFormValues,
   ProfileGender,
 } from '../types';
@@ -15,6 +16,13 @@ import {
   fileToBase64,
   getPasswordStrength,
 } from '../utils/profileFormValidation';
+import {
+  clearProfileFormDraft,
+  createProfileFormDraftFromForm,
+  readProfileFormDraft,
+  saveProfileFormDraft,
+} from '../utils/profileFormDraft';
+import { CountryAutocomplete } from './CountryAutocomplete';
 
 type ProfileFormErrors = Partial<Record<keyof ProfileFormValues, string>>;
 
@@ -92,15 +100,48 @@ export function UncontrolledProfileForm({
 }: UncontrolledProfileFormProps) {
   const countries = useAppSelector(selectCountries);
   const dispatch = useAppDispatch();
+  const femaleGenderRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const maleGenderRef = useRef<HTMLInputElement>(null);
   const formId = useId();
   const [errors, setErrors] = useState<ProfileFormErrors>({});
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>(
     emptyPasswordStrength
   );
+  const draft = readProfileFormDraft('uncontrolled');
 
   const getFieldId = (fieldName: string) => `${formId}-${fieldName}`;
   const schema = createProfileFormSchema(countries);
+
+  const handleGenderKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    direction: 'female-to-male' | 'male-to-female'
+  ) => {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    if (direction === 'female-to-male' && !event.shiftKey) {
+      event.preventDefault();
+      maleGenderRef.current?.focus();
+      return;
+    }
+
+    if (direction === 'male-to-female' && event.shiftKey) {
+      event.preventDefault();
+      femaleGenderRef.current?.focus();
+    }
+  };
+
+  const saveDraftFromForm = (
+    form: HTMLFormElement,
+    overrides?: Partial<ProfileFormDraft>
+  ) => {
+    saveProfileFormDraft(
+      'uncontrolled',
+      createProfileFormDraftFromForm(form, overrides)
+    );
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -127,6 +168,7 @@ export function UncontrolledProfileForm({
     );
     setErrors({});
     setPasswordStrength(emptyPasswordStrength);
+    clearProfileFormDraft('uncontrolled');
     formRef.current?.reset();
     onSuccess();
   };
@@ -136,24 +178,40 @@ export function UncontrolledProfileForm({
       className="profile-form"
       noValidate
       ref={formRef}
+      onChange={(event) => saveDraftFromForm(event.currentTarget)}
       onSubmit={handleSubmit}
     >
       <div className="profile-form__grid">
         <div className="profile-form__field">
           <label htmlFor={getFieldId('name')}>Name</label>
-          <input id={getFieldId('name')} name="name" type="text" />
+          <input
+            defaultValue={draft.name}
+            id={getFieldId('name')}
+            name="name"
+            type="text"
+          />
           <p className="profile-form__error">{errors.name}</p>
         </div>
 
         <div className="profile-form__field">
           <label htmlFor={getFieldId('age')}>Age</label>
-          <input id={getFieldId('age')} name="age" type="number" />
+          <input
+            defaultValue={draft.age}
+            id={getFieldId('age')}
+            name="age"
+            type="number"
+          />
           <p className="profile-form__error">{errors.age}</p>
         </div>
 
         <div className="profile-form__field">
           <label htmlFor={getFieldId('email')}>Email</label>
-          <input id={getFieldId('email')} name="email" type="email" />
+          <input
+            defaultValue={draft.email}
+            id={getFieldId('email')}
+            name="email"
+            type="email"
+          />
           <p className="profile-form__error">{errors.email}</p>
         </div>
 
@@ -161,30 +219,33 @@ export function UncontrolledProfileForm({
           <legend>Gender</legend>
           <label htmlFor={getFieldId('gender-female')}>
             <input
+              defaultChecked={draft.gender === 'female'}
               id={getFieldId('gender-female')}
               name="gender"
+              ref={femaleGenderRef}
+              tabIndex={0}
               type="radio"
               value="female"
+              onKeyDown={(event) =>
+                handleGenderKeyDown(event, 'female-to-male')
+              }
             />
             Female
           </label>
           <label htmlFor={getFieldId('gender-male')}>
             <input
+              defaultChecked={draft.gender === 'male'}
               id={getFieldId('gender-male')}
               name="gender"
+              ref={maleGenderRef}
+              tabIndex={0}
               type="radio"
               value="male"
+              onKeyDown={(event) =>
+                handleGenderKeyDown(event, 'male-to-female')
+              }
             />
             Male
-          </label>
-          <label htmlFor={getFieldId('gender-other')}>
-            <input
-              id={getFieldId('gender-other')}
-              name="gender"
-              type="radio"
-              value="other"
-            />
-            Other
           </label>
           <p className="profile-form__error">{errors.gender}</p>
         </fieldset>
@@ -202,21 +263,21 @@ export function UncontrolledProfileForm({
 
         <div className="profile-form__field">
           <label htmlFor={getFieldId('country')}>Country</label>
-          <input
+          <CountryAutocomplete
+            countries={countries}
+            defaultValue={draft.country}
             id={getFieldId('country')}
-            list={getFieldId('country-options')}
             name="country"
-            type="text"
+            onValueChange={(country) => {
+              if (formRef.current) {
+                saveDraftFromForm(formRef.current, { country });
+              }
+            }}
           />
-          <datalist id={getFieldId('country-options')}>
-            {countries.map((country) => (
-              <option key={country} value={country} />
-            ))}
-          </datalist>
           <p className="profile-form__error">{errors.country}</p>
         </div>
 
-        <div className="profile-form__field">
+        <div className="profile-form__field profile-form__password-field">
           <label htmlFor={getFieldId('password')}>Password</label>
           <input
             id={getFieldId('password')}
@@ -243,7 +304,7 @@ export function UncontrolledProfileForm({
           <p className="profile-form__error">{errors.password}</p>
         </div>
 
-        <div className="profile-form__field">
+        <div className="profile-form__field profile-form__confirm-password-field">
           <label htmlFor={getFieldId('confirmPassword')}>
             Confirm password
           </label>
@@ -258,7 +319,12 @@ export function UncontrolledProfileForm({
 
       <div className="profile-form__field profile-form__terms">
         <label htmlFor={getFieldId('terms')}>
-          <input id={getFieldId('terms')} name="terms" type="checkbox" />
+          <input
+            defaultChecked={draft.terms}
+            id={getFieldId('terms')}
+            name="terms"
+            type="checkbox"
+          />
           Accept Terms and Conditions
         </label>
         <p className="profile-form__error">{errors.terms}</p>
