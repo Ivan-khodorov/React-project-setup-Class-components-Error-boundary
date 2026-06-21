@@ -80,7 +80,9 @@ typings/
 .cache
 
 # Next.js build output
-.next
+.next/
+next-env.d.ts
+out/
 
 # Nuxt.js build / generate output
 .nuxt

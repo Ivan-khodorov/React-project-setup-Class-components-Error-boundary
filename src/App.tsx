@@ -2,9 +2,9 @@ import { Link, Route, Routes } from 'react-router';
 import './App.css';
 import { CharacterDetails } from './components/CharacterDetails';
 import { ThemeSelector } from './components/ThemeSelector';
-import { AboutPage } from './pages/AboutPage';
-import { HomePage } from './pages/HomePage';
-import { NotFoundPage } from './pages/NotFoundPage';
+import { AboutPage } from './legacy-pages/AboutPage';
+import { HomePage } from './legacy-pages/HomePage';
+import { NotFoundPage } from './legacy-pages/NotFoundPage';
 
 export default function App() {
   return (

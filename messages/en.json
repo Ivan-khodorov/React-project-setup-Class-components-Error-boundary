@@ -1,0 +1,10 @@
+{
+  "Home": {
+    "description": "The Next.js App Router foundation is ready for the server-rendered search migration.",
+    "title": "Star Trek character search"
+  },
+  "Navigation": {
+    "home": "Home",
+    "label": "Main navigation"
+  }
+}

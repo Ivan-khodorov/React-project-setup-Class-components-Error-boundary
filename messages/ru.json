@@ -1,0 +1,10 @@
+{
+  "Home": {
+    "description": "Основа Next.js App Router готова к переносу серверного поиска.",
+    "title": "Поиск персонажей Star Trek"
+  },
+  "Navigation": {
+    "home": "Главная",
+    "label": "Основная навигация"
+  }
+}
