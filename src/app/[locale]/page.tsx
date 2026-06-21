@@ -43,6 +43,12 @@ export default async function HomePage({
 
   try {
     result = await requestCharacters({
+      descriptionLabels: {
+        birthYear: translations('details.birthYear'),
+        deathYear: translations('details.deathYear'),
+        gender: translations('details.gender'),
+        unknown: translations('details.unknown'),
+      },
       page: currentPage,
       searchTerm,
     });
@@ -99,6 +105,7 @@ export default async function HomePage({
             error: translations('details.error'),
             gender: translations('details.gender'),
             title: translations('details.title'),
+            unknown: translations('details.unknown'),
           }}
         />
       </div>

@@ -8,12 +8,20 @@ import { store } from '@/store/store';
 
 interface AppProvidersProps {
   children: ReactNode;
+  errorTranslations: {
+    code: string;
+    description: string;
+    title: string;
+  };
 }
 
-export function AppProviders({ children }: AppProvidersProps) {
+export function AppProviders({
+  children,
+  errorTranslations,
+}: AppProvidersProps) {
   return (
     <Provider store={store}>
-      <ErrorBoundary>
+      <ErrorBoundary translations={errorTranslations}>
         <ThemeProvider>{children}</ThemeProvider>
       </ErrorBoundary>
     </Provider>

@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import '../../App.css';
 import '../../index.css';
 import { AppProviders } from '@/app/providers';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { LocalizedSelectedItemsFlyout } from '@/components/LocalizedSelectedItemsFlyout';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { Link } from '@/i18n/navigation';
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const messages = await getMessages();
+  const errorTranslations = await getTranslations('Error');
   const translations = await getTranslations('Navigation');
   const themeTranslations = await getTranslations('Theme');
 
@@ -47,20 +49,32 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <AppProviders>
+          <AppProviders
+            errorTranslations={{
+              code: errorTranslations('code'),
+              description: errorTranslations('description'),
+              title: errorTranslations('title'),
+            }}
+          >
             <div className="app">
               <header className="app-header">
                 <nav className="app-nav" aria-label={translations('label')}>
                   <Link href="/">{translations('home')}</Link>
+                  <Link href="/about">{translations('about')}</Link>
                 </nav>
-                <ThemeSelector
-                  translations={{
-                    dark: themeTranslations('dark'),
-                    label: themeTranslations('label'),
-                    light: themeTranslations('light'),
-                    selection: themeTranslations('selection'),
-                  }}
-                />
+                <div className="app-header__controls">
+                  <Suspense fallback={null}>
+                    <LocaleSwitcher />
+                  </Suspense>
+                  <ThemeSelector
+                    translations={{
+                      dark: themeTranslations('dark'),
+                      label: themeTranslations('label'),
+                      light: themeTranslations('light'),
+                      selection: themeTranslations('selection'),
+                    }}
+                  />
+                </div>
               </header>
               <main>{children}</main>
               <LocalizedSelectedItemsFlyout />

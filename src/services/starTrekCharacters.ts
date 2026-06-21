@@ -24,8 +24,16 @@ interface CharacterDetailsApiResponse {
 }
 
 export interface CharactersQueryArgs {
+  descriptionLabels?: CharacterValueLabels;
   searchTerm: string;
   page?: number;
+}
+
+export interface CharacterValueLabels {
+  birthYear: string;
+  deathYear: string;
+  gender: string;
+  unknown: string;
 }
 
 export interface CharactersResult {
@@ -33,12 +41,26 @@ export interface CharactersResult {
   totalPages: number;
 }
 
-const formatValue = (value: string | number | null | undefined): string =>
+const defaultValueLabels: CharacterValueLabels = {
+  birthYear: 'Birth year',
+  deathYear: 'Death year',
+  gender: 'Gender',
+  unknown: 'unknown',
+};
+
+const formatValue = (
+  value: string | number | null | undefined,
+  unknownLabel = defaultValueLabels.unknown
+): string =>
   value === null || value === undefined || value === ''
-    ? 'unknown'
+    ? unknownLabel
     : String(value);
 
-const toItem = (character: CharacterApiItem, index = 0): Item => {
+const toItem = (
+  character: CharacterApiItem,
+  index = 0,
+  labels = defaultValueLabels
+): Item => {
   const fallbackId = `${character.name}-${index}`;
   const detailsId = character.uid || fallbackId;
 
@@ -46,7 +68,7 @@ const toItem = (character: CharacterApiItem, index = 0): Item => {
     detailsId,
     id: character.uid ? `${character.uid}-${index}` : fallbackId,
     name: character.name,
-    description: `Gender: ${formatValue(character.gender)}. Birth year: ${formatValue(character.yearOfBirth)}. Death year: ${formatValue(character.yearOfDeath)}.`,
+    description: `${labels.gender}: ${formatValue(character.gender, labels.unknown)}. ${labels.birthYear}: ${formatValue(character.yearOfBirth, labels.unknown)}. ${labels.deathYear}: ${formatValue(character.yearOfDeath, labels.unknown)}.`,
   };
 };
 
@@ -60,6 +82,7 @@ const toCharacterDetails = (
 });
 
 export const requestCharacters = async ({
+  descriptionLabels = defaultValueLabels,
   page = 1,
   searchTerm,
 }: CharactersQueryArgs): Promise<CharactersResult> => {
@@ -95,7 +118,9 @@ export const requestCharacters = async ({
   }
 
   return {
-    items: data.characters.map(toItem),
+    items: data.characters.map((character, index) =>
+      toItem(character, index, descriptionLabels)
+    ),
     totalPages: data.page.totalPages,
   };
 };

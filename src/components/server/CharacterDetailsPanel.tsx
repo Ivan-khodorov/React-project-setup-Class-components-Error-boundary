@@ -14,6 +14,7 @@ interface CharacterDetailsPanelProps {
     error: string;
     gender: string;
     title: string;
+    unknown: string;
   };
 }
 
@@ -70,19 +71,25 @@ export async function CharacterDetailsPanel({
             <div className="details-list__item">
               <dt>{translations.gender}</dt>
               <dd className={getValueClassName(details.gender)}>
-                {details.gender}
+                {details.gender === UNKNOWN_VALUE
+                  ? translations.unknown
+                  : details.gender}
               </dd>
             </div>
             <div className="details-list__item">
               <dt>{translations.birthYear}</dt>
               <dd className={getValueClassName(details.birthYear)}>
-                {details.birthYear}
+                {details.birthYear === UNKNOWN_VALUE
+                  ? translations.unknown
+                  : details.birthYear}
               </dd>
             </div>
             <div className="details-list__item">
               <dt>{translations.deathYear}</dt>
               <dd className={getValueClassName(details.deathYear)}>
-                {details.deathYear}
+                {details.deathYear === UNKNOWN_VALUE
+                  ? translations.unknown
+                  : details.deathYear}
               </dd>
             </div>
           </dl>

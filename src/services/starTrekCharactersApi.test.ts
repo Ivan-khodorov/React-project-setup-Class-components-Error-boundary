@@ -140,6 +140,47 @@ describe('starTrekCharactersApi', () => {
     });
   });
 
+  it('localizes generated description labels without translating API data', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
+        characters: [
+          {
+            gender: 'Male',
+            name: 'Spock',
+            uid: 'spock',
+            yearOfBirth: 2230,
+          },
+        ],
+        page: { totalPages: 1 },
+      }),
+      ok: true,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      dispatchCharactersQuery({
+        descriptionLabels: {
+          birthYear: 'Год рождения',
+          deathYear: 'Год смерти',
+          gender: 'Пол',
+          unknown: 'неизвестно',
+        },
+        searchTerm: 'spock',
+      })
+    ).resolves.toMatchObject({
+      data: {
+        items: [
+          {
+            description:
+              'Пол: Male. Год рождения: 2230. Год смерти: неизвестно.',
+            name: 'Spock',
+          },
+        ],
+      },
+    });
+  });
+
   it('uses unknown for missing response fields', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       json: vi.fn().mockResolvedValue({
