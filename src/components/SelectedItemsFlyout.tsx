@@ -1,12 +1,31 @@
+'use client';
+
 import { clearSelectedItems } from '../store/selectedItemsSlice';
 import {
   selectSelectedItems,
   selectSelectedItemsCount,
 } from '../store/selectedItemsSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { createSelectedItemsCsv } from '../utils/csv';
 
-export function SelectedItemsFlyout() {
+interface SelectedItemsFlyoutProps {
+  translations?: {
+    clear: string;
+    count: (count: number) => string;
+    download: string;
+    label: string;
+  };
+}
+
+const defaultTranslations = {
+  clear: 'Unselect all',
+  count: (count: number) => `${count} selected`,
+  download: 'Download',
+  label: 'Selected items',
+};
+
+export function SelectedItemsFlyout({
+  translations = defaultTranslations,
+}: SelectedItemsFlyoutProps) {
   const dispatch = useAppDispatch();
   const selectedItems = useAppSelector(selectSelectedItems);
   const selectedItemsCount = useAppSelector(selectSelectedItemsCount);
@@ -19,28 +38,24 @@ export function SelectedItemsFlyout() {
     dispatch(clearSelectedItems());
   };
 
-  const handleDownload = () => {
-    const csv = createSelectedItemsCsv(selectedItems);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = `${selectedItemsCount}_items.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <aside className="selected-items-flyout" aria-label="Selected items">
-      <p>{selectedItemsCount} selected</p>
+    <aside
+      className="selected-items-flyout"
+      aria-label={translations.label}
+    >
+      <p>{translations.count(selectedItemsCount)}</p>
       <div>
         <button type="button" onClick={handleUnselectAll}>
-          Unselect all
+          {translations.clear}
         </button>
-        <button type="button" onClick={handleDownload}>
-          Download
-        </button>
+        <form action="/api/csv" method="post">
+          <input
+            name="items"
+            type="hidden"
+            value={JSON.stringify(selectedItems)}
+          />
+          <button type="submit">{translations.download}</button>
+        </form>
       </div>
     </aside>
   );

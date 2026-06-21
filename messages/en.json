@@ -19,6 +19,7 @@
       "empty": "No characters found.",
       "error": "Failed to load results.",
       "label": "Search results",
+      "select": "Select",
       "viewDetails": "View details"
     },
     "search": {
@@ -30,5 +31,17 @@
   "Navigation": {
     "home": "Home",
     "label": "Main navigation"
+  },
+  "SelectedItems": {
+    "clear": "Unselect all",
+    "count": "{count, plural, one {# selected} other {# selected}}",
+    "download": "Download",
+    "label": "Selected items"
+  },
+  "Theme": {
+    "dark": "Dark",
+    "label": "Theme",
+    "light": "Light",
+    "selection": "Theme selection"
   }
 }

@@ -587,6 +587,10 @@
   gap: 8px;
 }
 
+.selected-items-flyout form {
+  display: contents;
+}
+
 .selected-items-flyout button {
   min-height: 36px;
   border: 1px solid var(--color-primary-hover);

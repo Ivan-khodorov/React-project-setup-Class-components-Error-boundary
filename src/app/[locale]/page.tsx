@@ -71,6 +71,7 @@ export default async function HomePage({
           <SearchResults
             currentPage={currentPage}
             detailsId={detailsId}
+            locale={locale}
             result={result}
             searchTerm={searchTerm}
             translations={{
@@ -81,6 +82,7 @@ export default async function HomePage({
                 next: translations('pagination.next'),
                 previous: translations('pagination.previous'),
               },
+              select: translations('results.select'),
               viewDetails: translations('results.viewDetails'),
             }}
           />

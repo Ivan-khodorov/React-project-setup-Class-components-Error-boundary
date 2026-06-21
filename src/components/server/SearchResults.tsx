@@ -5,6 +5,7 @@ import type { CharactersResult } from '@/services/starTrekCharacters';
 interface SearchResultsProps {
   currentPage: number;
   detailsId: string;
+  locale: string;
   result: CharactersResult | null;
   searchTerm: string;
   translations: {
@@ -15,6 +16,7 @@ interface SearchResultsProps {
       next: string;
       previous: string;
     };
+    select: string;
     viewDetails: string;
   };
 }
@@ -22,6 +24,7 @@ interface SearchResultsProps {
 export function SearchResults({
   currentPage,
   detailsId,
+  locale,
   result,
   searchTerm,
   translations,
@@ -44,7 +47,9 @@ export function SearchResults({
             currentPage={currentPage}
             item={item}
             key={item.id}
+            locale={locale}
             searchTerm={searchTerm}
+            selectLabel={translations.select}
             viewDetailsLabel={translations.viewDetails}
           />
         ))

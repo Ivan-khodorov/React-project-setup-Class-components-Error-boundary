@@ -27,6 +27,8 @@ describe('ThemeSelector', () => {
     fireEvent.click(screen.getByRole('radio', { name: /dark/i }));
 
     expect(screen.getByRole('radio', { name: /dark/i })).toBeChecked();
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(
+      screen.getByRole('radio', { name: /dark/i }).closest('.theme-root')
+    ).toHaveAttribute('data-theme', 'dark');
   });
 });

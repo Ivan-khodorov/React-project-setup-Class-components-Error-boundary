@@ -5,6 +5,9 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import '../../App.css';
 import '../../index.css';
+import { AppProviders } from '@/app/providers';
+import { LocalizedSelectedItemsFlyout } from '@/components/LocalizedSelectedItemsFlyout';
+import { ThemeSelector } from '@/components/ThemeSelector';
 import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 
@@ -38,19 +41,31 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
   const translations = await getTranslations('Navigation');
+  const themeTranslations = await getTranslations('Theme');
 
   return (
     <html lang={locale}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <div className="app">
-            <header className="app-header">
-              <nav className="app-nav" aria-label={translations('label')}>
-                <Link href="/">{translations('home')}</Link>
-              </nav>
-            </header>
-            <main>{children}</main>
-          </div>
+          <AppProviders>
+            <div className="app">
+              <header className="app-header">
+                <nav className="app-nav" aria-label={translations('label')}>
+                  <Link href="/">{translations('home')}</Link>
+                </nav>
+                <ThemeSelector
+                  translations={{
+                    dark: themeTranslations('dark'),
+                    label: themeTranslations('label'),
+                    light: themeTranslations('light'),
+                    selection: themeTranslations('selection'),
+                  }}
+                />
+              </header>
+              <main>{children}</main>
+              <LocalizedSelectedItemsFlyout />
+            </div>
+          </AppProviders>
         </NextIntlClientProvider>
       </body>
     </html>

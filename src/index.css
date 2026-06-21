@@ -29,7 +29,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-:root[data-theme='dark'] {
+[data-theme='dark'] {
   --color-background: #12151c;
   --color-surface: #1d222c;
   --color-surface-muted: #252b36;
@@ -54,6 +54,12 @@
 
 body {
   margin: 0;
+  background: var(--color-background);
+}
+
+.theme-root {
+  min-height: 100vh;
+  color: var(--color-text);
   background: var(--color-background);
 }
 
