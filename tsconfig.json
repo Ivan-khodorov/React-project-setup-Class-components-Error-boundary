@@ -27,8 +27,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2017",
-    "allowJs": true,
-    "types": ["vite/client"]
+    "allowJs": true
   },
   "include": [
     "next-env.d.ts",

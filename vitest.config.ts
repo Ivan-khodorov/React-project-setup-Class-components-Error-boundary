@@ -1,15 +1,16 @@
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/React-project-setup-Class-components-Error-boundary/',
-  plugins: [react()],
   test: {
     coverage: {
       exclude: [
+        'src/app/[locale]/**',
+        'src/app/not-found.tsx',
+        'src/app/providers.tsx',
+        'src/components/server/**',
+        'src/proxy.ts',
         'src/**/*.test.{js,jsx,ts,tsx}',
         'src/**/*.spec.{js,jsx,ts,tsx}',
-        'src/main.{js,jsx,ts,tsx}',
         'src/setupTests.{js,ts}',
         'src/**/*.d.ts',
       ],
