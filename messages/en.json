@@ -1,6 +1,30 @@
 {
   "Home": {
-    "description": "The Next.js App Router foundation is ready for the server-rendered search migration.",
+    "details": {
+      "birthYear": "Birth year",
+      "close": "Close",
+      "deathYear": "Death year",
+      "empty": "Select a character to view server-rendered details.",
+      "error": "Failed to load character details.",
+      "gender": "Gender",
+      "title": "Character details"
+    },
+    "loading": "Loading...",
+    "pagination": {
+      "label": "Pagination",
+      "next": "Next",
+      "previous": "Previous"
+    },
+    "results": {
+      "empty": "No characters found.",
+      "error": "Failed to load results.",
+      "label": "Search results",
+      "viewDetails": "View details"
+    },
+    "search": {
+      "inputLabel": "Search",
+      "submit": "Search"
+    },
     "title": "Star Trek character search"
   },
   "Navigation": {
