@@ -1,0 +1,70 @@
+{
+  "About": {
+    "author": "Author: {name}",
+    "course": "RS School React course",
+    "title": "About"
+  },
+  "Error": {
+    "code": "Error",
+    "description": "Please reload the page and try again. The error was logged for debugging.",
+    "title": "Something went wrong."
+  },
+  "Home": {
+    "details": {
+      "birthYear": "Birth year",
+      "close": "Close",
+      "deathYear": "Death year",
+      "empty": "Select a character to view server-rendered details.",
+      "error": "Failed to load character details.",
+      "gender": "Gender",
+      "title": "Character details",
+      "unknown": "unknown"
+    },
+    "loading": "Loading...",
+    "pagination": {
+      "label": "Pagination",
+      "next": "Next",
+      "previous": "Previous"
+    },
+    "results": {
+      "empty": "No characters found.",
+      "error": "Failed to load results.",
+      "label": "Search results",
+      "select": "Select",
+      "viewDetails": "View details"
+    },
+    "search": {
+      "inputLabel": "Search",
+      "submit": "Search"
+    },
+    "title": "Star Trek character search"
+  },
+  "Navigation": {
+    "about": "About",
+    "home": "Home",
+    "label": "Main navigation"
+  },
+  "Locale": {
+    "en": "English",
+    "label": "Language",
+    "ru": "Russian",
+    "selection": "Language selection"
+  },
+  "NotFound": {
+    "description": "The requested page does not exist. Check the address or return to the main app.",
+    "return": "Return to the main app",
+    "title": "Page not found"
+  },
+  "SelectedItems": {
+    "clear": "Unselect all",
+    "count": "{count, plural, one {# selected} other {# selected}}",
+    "download": "Download",
+    "label": "Selected items"
+  },
+  "Theme": {
+    "dark": "Dark",
+    "label": "Theme",
+    "light": "Light",
+    "selection": "Theme selection"
+  }
+}

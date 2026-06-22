@@ -22,7 +22,9 @@ describe('ThemeProvider', () => {
     );
 
     expect(screen.getByRole('button', { name: 'light' })).toBeInTheDocument();
-    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    expect(
+      screen.getByRole('button', { name: 'light' }).closest('.theme-root')
+    ).toHaveAttribute('data-theme', 'light');
   });
 
   it('switches theme through context', () => {
@@ -35,6 +37,8 @@ describe('ThemeProvider', () => {
     fireEvent.click(screen.getByRole('button', { name: 'light' }));
 
     expect(screen.getByRole('button', { name: 'dark' })).toBeInTheDocument();
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(
+      screen.getByRole('button', { name: 'dark' }).closest('.theme-root')
+    ).toHaveAttribute('data-theme', 'dark');
   });
 });

@@ -1,46 +1,28 @@
-"# Star Trek Characters Search
+# Star Trek Characters Search
 
-A React application for searching Star Trek characters, implemented using class components and thoroughly tested for reliability and stability.
+A TypeScript application migrated to Next.js App Router with server-rendered
+search results, localized navigation, server-side character details, and
+server-generated CSV downloads.
 
-## 🚀 Features
-- Search for Star Trek characters via API.
-- Persistence of search terms using `localStorage`.
-- Robust error handling with a global `ErrorBoundary`.
-- Loading states and error messages for better UX.
+## Features
 
-## 🧪 Testing
-The project has a comprehensive test suite focused on behavior-driven testing of class components.
+- Next.js App Router with server and client components.
+- English and Russian UI powered by `next-intl`.
+- Server Action search and server-rendered pagination/results.
+- Server-side character detail requests.
+- Redux-based selected item state.
+- CSV generation through a Next.js route handler.
+- Handwritten light/dark theme context.
+- Static server-rendered About page and localized 404 handling.
 
-### Test Coverage
-The project achieves high test coverage, exceeding the minimum requirements:
-- **Statements**: $\ge 80\%$ (Actual: $\approx 98\%$)
-- **Branches**: $\ge 50\%$ (Actual: $\approx 92\%$)
-- **Functions**: $\ge 50\%$ (Actual: $100\%$)
-- **Lines**: $\ge 50\%$ (Actual: $\approx 98\%$)
+## Commands
 
-### Running Tests
-To run all tests:
 ```bash
+npm install
+npm run dev
+npm run lint
 npm run test
+npm run build
 ```
 
-To generate a coverage report:
-```bash
-npm run test:coverage
-```
-
-## 🛠 Development & Quality Control
-- **Linting**: ESLint is used to maintain code quality. Run `npm run lint` to check for issues.
-- **Build**: The project is built using Vite and TypeScript. Run `npm run build` to create a production bundle.
-- **Git Hooks**: Husky is configured to run tests on `pre-push` to ensure no breaking changes are pushed to the repository.
-
-## 📦 Installation & Setup
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+The development server is available at `http://localhost:3000`.

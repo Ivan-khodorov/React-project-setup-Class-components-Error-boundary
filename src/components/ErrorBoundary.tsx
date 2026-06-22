@@ -2,6 +2,11 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
+  translations?: {
+    code: string;
+    description: string;
+    title: string;
+  };
 }
 
 interface ErrorBoundaryState {
@@ -29,16 +34,20 @@ export class ErrorBoundary extends Component<
   }
 
   render() {
+    const translations = this.props.translations ?? {
+      code: 'Error',
+      description:
+        'Please reload the page and try again. The error was logged for debugging.',
+      title: 'Something went wrong.',
+    };
+
     if (this.state.hasError) {
       return (
         <main className="error-boundary-page">
           <section className="error-panel" role="alert">
-            <p className="error-panel__code">Error</p>
-            <h1>Something went wrong.</h1>
-            <p>
-              Please reload the page and try again. The error was logged for
-              debugging.
-            </p>
+            <p className="error-panel__code">{translations.code}</p>
+            <h1>{translations.title}</h1>
+            <p>{translations.description}</p>
           </section>
         </main>
       );

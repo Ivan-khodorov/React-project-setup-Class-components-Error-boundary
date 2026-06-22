@@ -1,0 +1,87 @@
+import type { Metadata } from 'next';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { Suspense, type ReactNode } from 'react';
+import '../../App.css';
+import '../../index.css';
+import { AppProviders } from '@/app/providers';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { LocalizedSelectedItemsFlyout } from '@/components/LocalizedSelectedItemsFlyout';
+import { ThemeSelector } from '@/components/ThemeSelector';
+import { Link } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
+
+interface LocaleLayoutProps {
+  children: ReactNode;
+  params: Promise<{
+    locale: string;
+  }>;
+}
+
+export const metadata: Metadata = {
+  description: 'Star Trek character search application',
+  title: 'Star Trek Characters',
+};
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function LocaleLayout({
+  children,
+  params,
+}: LocaleLayoutProps) {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+
+  const messages = await getMessages();
+  const errorTranslations = await getTranslations('Error');
+  const translations = await getTranslations('Navigation');
+  const themeTranslations = await getTranslations('Theme');
+
+  return (
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider messages={messages}>
+          <AppProviders
+            errorTranslations={{
+              code: errorTranslations('code'),
+              description: errorTranslations('description'),
+              title: errorTranslations('title'),
+            }}
+          >
+            <div className="app">
+              <header className="app-header">
+                <nav className="app-nav" aria-label={translations('label')}>
+                  <Link href="/">{translations('home')}</Link>
+                  <Link href="/about">{translations('about')}</Link>
+                </nav>
+                <div className="app-header__controls">
+                  <Suspense fallback={null}>
+                    <LocaleSwitcher />
+                  </Suspense>
+                  <ThemeSelector
+                    translations={{
+                      dark: themeTranslations('dark'),
+                      label: themeTranslations('label'),
+                      light: themeTranslations('light'),
+                      selection: themeTranslations('selection'),
+                    }}
+                  />
+                </div>
+              </header>
+              <main>{children}</main>
+              <LocalizedSelectedItemsFlyout />
+            </div>
+          </AppProviders>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { useMemo, useState, type PropsWithChildren } from 'react';
 import {
   ThemeContext,
   type Theme,
@@ -7,10 +7,6 @@ import {
 
 export function ThemeProvider({ children }: PropsWithChildren) {
   const [theme, setTheme] = useState<Theme>('light');
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
@@ -26,6 +22,10 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   );
 
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>
+      <div className="theme-root" data-theme={theme}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
   );
 }

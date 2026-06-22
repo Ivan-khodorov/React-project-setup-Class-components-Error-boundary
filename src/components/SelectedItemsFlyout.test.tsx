@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SelectedItemsFlyout } from './SelectedItemsFlyout';
 import {
   selectedItemsReducer,
@@ -46,10 +46,6 @@ const renderFlyout = (items: SelectedItem[] = []) => {
 };
 
 describe('SelectedItemsFlyout', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it('does not render when there are no selected items', () => {
     renderFlyout();
 
@@ -80,33 +76,14 @@ describe('SelectedItemsFlyout', () => {
     });
   });
 
-  it('downloads selected items as csv', () => {
-    const createObjectUrl = vi
-      .spyOn(URL, 'createObjectURL')
-      .mockReturnValue('blob:csv');
-    const revokeObjectUrl = vi
-      .spyOn(URL, 'revokeObjectURL')
-      .mockImplementation(() => {});
-    const click = vi.fn();
-    const anchor = document.createElement('a');
-    vi.spyOn(anchor, 'click').mockImplementation(click);
-    const originalCreateElement = document.createElement.bind(document);
-    vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
-      if (tagName === 'a') {
-        return anchor;
-      }
-
-      return originalCreateElement(tagName);
-    });
-
+  it('submits selected items to the server csv route', () => {
     renderFlyout([spock, kirk]);
 
-    screen.getByRole('button', { name: /download/i }).click();
+    const form = screen.getByRole('button', { name: /download/i }).closest('form');
+    const input = form?.querySelector<HTMLInputElement>('input[name="items"]');
 
-    expect(createObjectUrl).toHaveBeenCalledWith(expect.any(Blob));
-    expect(anchor.href).toBe('blob:csv');
-    expect(anchor.download).toBe('2_items.csv');
-    expect(click).toHaveBeenCalledTimes(1);
-    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:csv');
+    expect(form).toHaveAttribute('action', '/api/csv');
+    expect(form).toHaveAttribute('method', 'post');
+    expect(input?.value).toBe(JSON.stringify([spock, kirk]));
   });
 });

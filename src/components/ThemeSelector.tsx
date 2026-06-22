@@ -1,14 +1,39 @@
+'use client';
+
 import { useTheme } from '../context/useTheme';
 import type { Theme } from '../context/themeContextValue';
 
 const themes: Theme[] = ['light', 'dark'];
 
-export function ThemeSelector() {
+interface ThemeSelectorProps {
+  translations?: {
+    dark: string;
+    label: string;
+    light: string;
+    selection: string;
+  };
+}
+
+const defaultTranslations = {
+  dark: 'Dark',
+  label: 'Theme',
+  light: 'Light',
+  selection: 'Theme selection',
+};
+
+export function ThemeSelector({
+  translations = defaultTranslations,
+}: ThemeSelectorProps) {
   const { theme, setTheme } = useTheme();
 
   return (
-    <fieldset className="theme-selector" aria-label="Theme selection">
-      <legend className="theme-selector__legend">Theme</legend>
+    <fieldset
+      className="theme-selector"
+      aria-label={translations.selection}
+    >
+      <legend className="theme-selector__legend">
+        {translations.label}
+      </legend>
       {themes.map((themeOption) => (
         <label
           className={
@@ -25,7 +50,7 @@ export function ThemeSelector() {
             value={themeOption}
             onChange={() => setTheme(themeOption)}
           />
-          <span>{themeOption}</span>
+          <span>{translations[themeOption]}</span>
         </label>
       ))}
     </fieldset>
